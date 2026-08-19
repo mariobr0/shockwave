@@ -1,4 +1,4 @@
-﻿import tkinter as tk
+import tkinter as tk
 import queue
 
 class WinVoiceUI:
@@ -13,15 +13,15 @@ class WinVoiceUI:
         self.label = tk.Label(self.root, text="", bg="#2d2d2d", fg="white", font=("Segoe UI", 12), padx=15, pady=5)
         self.label.pack(pady=(5, 0))
         
-        self.llm_enabled = True
+        self.llm_enabled = False
         
         def toggle_llm():
             self.llm_enabled = self.use_llm_var.get()
             
-        self.use_llm_var = tk.BooleanVar(value=True)
+        self.use_llm_var = tk.BooleanVar(value=False)
         self.chk = tk.Checkbutton(
             self.root,
-            text="LLM Нормализация",
+            text="LLM norm",
             variable=self.use_llm_var,
             command=toggle_llm,
             bg="#2d2d2d",
@@ -36,7 +36,7 @@ class WinVoiceUI:
         
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        width = 300
+        width = 140
         height = 65
         
         if position == "bottom-right":
@@ -53,7 +53,8 @@ class WinVoiceUI:
             y = screen_height - height - 60
             
         self.root.geometry(f"{width}x{height}+{x}+{y}")
-        self.root.withdraw()
+        # self.root.withdraw()  # Removed so it shows immediately on startup
+
         
         self.fade_id = None
         self.check_queue()

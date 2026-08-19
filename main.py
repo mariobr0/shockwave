@@ -40,18 +40,18 @@ class WinVoiceApp:
                 threading.Thread(target=self.process_audio_thread, daemon=True).start()
 
     def start_recording_thread(self):
-        self.q.put({"cmd": "show", "text": "🔴 Идет запись..."})
+        self.q.put({"cmd": "show", "text": "🔴 record"})
         self.audio.start_recording()
 
     def process_audio_thread(self):
-        self.q.put({"cmd": "show", "text": "⚙️ Обработка..."})
+        self.q.put({"cmd": "show", "text": "⚙️ processing"})
         
         self.audio.stop_recording()
         raw_text = self.audio.transcribe()
         
         if raw_text:
             if self.ui.llm_enabled:
-                self.q.put({"cmd": "show", "text": "🧠 Нормализация..."})
+                self.q.put({"cmd": "show", "text": "🧠 norm"})
                 print(f"Sending to LLM: {raw_text}")
                 final_text = self.llm.normalize(raw_text)
             else:
@@ -60,7 +60,7 @@ class WinVoiceApp:
                 
             print(f"Final text: {final_text}")
             self.typer.type_text(final_text)
-            self.q.put({"cmd": "fade_out", "text": "✅ Текст готов для вставки"})
+            self.q.put({"cmd": "fade_out", "text": "✅ ready"})
         else:
             print("Warning: Transcription was empty or failed. Skipping.")
             self.q.put({"cmd": "hide"})
