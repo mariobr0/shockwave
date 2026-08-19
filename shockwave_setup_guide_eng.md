@@ -1,6 +1,6 @@
-﻿# Full Deployment Guide for Shockwave (Global Voice Dictation)
+﻿# Shockwave
 
-Shockwave is a custom Python script that allows you to dictate text in any Windows application using a global hotkey. It records your audio, transcribes it locally (via Whisper), and sends it to an LLM (Neural Network) to correct punctuation and typos, seamlessly copying the polished text to your clipboard.
+Shockwave is a Python script for voice dictation on Windows. It records audio, transcribes it locally via Whisper, and sends it to an LLM to correct punctuation and typos. The resulting text is copied to the clipboard.
 
 Since the project relies on local technologies, a few third-party utilities are required.
 
@@ -18,16 +18,16 @@ SoX is a command-line utility used to capture microphone audio.
    ```
 
 ### 2. Install Whisper.cpp (Local Speech Recognition)
-Whisper.cpp is an ultra-fast C/C++ port of OpenAI's Whisper model that runs on CPU or GPU.
+Whisper.cpp is a port of OpenAI's Whisper model that runs on CPU or GPU.
 1. Go to the [whisper.cpp releases page on GitHub](https://github.com/ggerganov/whisper.cpp/releases).
 2. Download the archive for your system (e.g., `whisper-bin-x64.zip` for standard PCs or `whisper-cublas-...-bin-x64.zip` if you have an NVIDIA GPU).
 3. Extract the archive into a convenient folder (e.g., `C:\tools\whisper`). Inside, you will find the executable file (usually named `whisper-cli.exe` or `main.exe`).
 4. **Download the Language Model:**
    Download a model file, for example, [ggml-large-v3-turbo-q5_0.bin](https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin). 
-   Place it in a convenient folder, e.g.: `C:\Users\%USERNAME%\.local\share\whisper-cpp\`.
+   Place it in a folder, e.g.: `C:\Users\%USERNAME%\.local\share\whisper-cpp\`.
 
 ### 3. Setup a Local or Cloud LLM
-The script requires an OpenAI-compatible API server to "normalize" the text (fixing punctuation and typos without summarizing).
+The script requires an OpenAI-compatible API server to normalize the text (fixing punctuation and typos).
 This can be:
 * Your own local proxy wrapping the Gemini API (e.g., running on `http://127.0.0.1:8045/v1`).
 * A local server using LM Studio or Ollama.
@@ -35,7 +35,7 @@ This can be:
 
 ---
 
-## Part 2. Shockwave Project Setup
+## Part 2. Project Setup
 
 ### 1. Python Preparation
 Ensure you have Python installed (version 3.10 or higher).
@@ -74,12 +74,12 @@ UI_POSITION=bottom-left
 
 ## Part 3. Usage
 
-1. Launch the script by double-clicking the `start.bat` file. A console window will open, displaying useful operation logs. You can simply minimize this window.
-2. A persistent widget saying **"what is your command?"** will appear in the bottom-left corner of your screen. This means the script is ready. You can toggle the **"LLM norm"** checkbox to enable or disable AI text normalization.
-3. Press **F12** (or your custom hotkey) **absolutely anywhere**—you don't need to have a text field focused. The widget will change its status to **"🔴 record"**.
-4. Dictate your desired text into the microphone.
+1. Run the script via `start.bat`. A console window will open displaying logs. You can minimize this window.
+2. A widget saying **"what is your command?"** will appear in the bottom-left corner of your screen. You can toggle the **"LLM norm"** checkbox to enable or disable text normalization.
+3. Press **F12** (or your custom hotkey). The widget will change its status to **"🔴 record"**.
+4. Dictate text into the microphone.
 5. Press **F12** again. The widget will sequentially display **"⚙️ processing"** and **"🧠 normalization"**.
-6. Once the status says **"✅ ready"**, the perfected text will be securely placed in your clipboard. Press `Ctrl+V` wherever you need it.
-7. After 5 seconds, the widget will return to its standby state **"what is your command?"**, waiting for your next instruction.
+6. Once the status says **"✅ ready"**, the text is in your clipboard. Press `Ctrl+V` to paste.
+7. After 5 seconds, the widget will return to its standby state **"what is your command?"**.
 
-> 💡 **Pro Tip:** The console serves as an excellent backup log. If you accidentally copy another text and overwrite your clipboard before pasting your dictation, simply maximize the console window—your text is safely preserved in the log history!
+> 💡 **Tip:** The console serves as a backup log. If you overwrite your clipboard, you can copy the text from the log history.
