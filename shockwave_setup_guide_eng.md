@@ -1,4 +1,4 @@
-﻿# Shockwave
+# Shockwave
 
 Shockwave is a Python script for voice dictation on Windows. It records audio, transcribes it locally via Whisper, and sends it to an LLM to correct punctuation and typos. The resulting text is copied to the clipboard.
 
@@ -41,7 +41,10 @@ This can be:
 Ensure you have Python installed (version 3.10 or higher).
 
 ### 2. Download and Configure the Script
-1. Clone or download the `Shockwave` project folder.
+1. Clone the repository via Git, or download the project as a ZIP archive from GitHub (green "Code" button -> "Download ZIP") and extract it:
+   ```bash
+   git clone https://github.com/mariobr0/shockwave.git
+   ```
 2. Open a terminal in the project folder and create a virtual environment:
    ```bash
    python -m venv venv

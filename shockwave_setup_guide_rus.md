@@ -1,4 +1,4 @@
-﻿# Shockwave
+# Shockwave
 
 Shockwave — это Python-скрипт для голосового ввода на Windows. Он записывает звук, переводит его в текст локально через Whisper и отправляет в LLM для исправления знаков препинания и ошибок, после чего копирует текст в буфер обмена.
 
@@ -41,11 +41,12 @@ Whisper.cpp — это версия модели Whisper от OpenAI, работ
 Убедитесь, что у вас установлен Python (версии 3.10 или выше).
 
 ### 2. Загрузка и настройка скрипта
-1. Склонируйте или скачайте папку с проектом `Shockwave`.
+1. Склонируйте репозиторий через Git, либо скачайте проект ZIP-архивом с GitHub (зеленая кнопка "Code" -> "Download ZIP") и распакуйте его:
+   ```bash
+   git clone https://github.com/mariobr0/shockwave.git
+   ```
 2. Откройте терминал в папке проекта и создайте виртуальное окружение:
    ```bash
-   python -m venv venv
-   ```
 3. Установите необходимые библиотеки (`keyboard`, `requests`, `pyperclip`, `python-dotenv`):
    ```bash
    venv\Scripts\pip install -r requirements.txt
