@@ -51,7 +51,7 @@ class WinVoiceApp:
         
         if raw_text:
             if self.ui.llm_enabled:
-                self.q.put({"cmd": "show", "text": "🧠 norm"})
+                self.q.put({"cmd": "show", "text": "🧠 normalization"})
                 print(f"Sending to LLM: {raw_text}")
                 final_text = self.llm.normalize(raw_text)
             else:
@@ -60,10 +60,10 @@ class WinVoiceApp:
                 
             print(f"Final text: {final_text}")
             self.typer.type_text(final_text)
-            self.q.put({"cmd": "fade_out", "text": "✅ ready"})
+            self.q.put({"cmd": "show_ready"})
         else:
             print("Warning: Transcription was empty or failed. Skipping.")
-            self.q.put({"cmd": "hide"})
+            self.q.put({"cmd": "show", "text": "what is your command?"})
         
         with self.lock:
             self.is_processing = False

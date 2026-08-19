@@ -1,4 +1,4 @@
-import tkinter as tk
+﻿import tkinter as tk
 import queue
 
 class WinVoiceUI:
@@ -10,7 +10,8 @@ class WinVoiceUI:
         self.root.attributes("-alpha", 0.9)
         self.root.configure(bg="#2d2d2d")
         
-        self.label = tk.Label(self.root, text="", bg="#2d2d2d", fg="white", font=("Segoe UI", 12), padx=15, pady=5)
+        self.idle_text = "what is your command?"
+        self.label = tk.Label(self.root, text=self.idle_text, bg="#2d2d2d", fg="white", font=("Segoe UI", 11), padx=10, pady=5)
         self.label.pack(pady=(5, 0))
         
         self.llm_enabled = False
@@ -36,7 +37,7 @@ class WinVoiceUI:
         
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        width = 140
+        width = 200
         height = 65
         
         if position == "bottom-right":
@@ -53,44 +54,33 @@ class WinVoiceUI:
             y = screen_height - height - 60
             
         self.root.geometry(f"{width}x{height}+{x}+{y}")
-        # self.root.withdraw()  # Removed so it shows immediately on startup
-
         
-        self.fade_id = None
+        self.reset_id = None
         self.check_queue()
 
-    def do_fade(self):
-        alpha = self.root.attributes("-alpha")
-        if alpha > 0:
-            self.root.attributes("-alpha", max(0, alpha - 0.05))
-            self.fade_id = self.root.after(50, self.do_fade)
-        else:
-            self.root.withdraw()
-            self.root.attributes("-alpha", 0.9)
-            self.fade_id = None
+    def reset_to_idle(self):
+        self.label.config(text=self.idle_text)
+        self.reset_id = None
 
     def check_queue(self):
         try:
             while True:
                 msg = self.queue.get_nowait()
                 cmd = msg.get("cmd")
+                
                 if cmd == "show":
-                    if self.fade_id:
-                        self.root.after_cancel(self.fade_id)
-                        self.fade_id = None
-                    self.root.attributes("-alpha", 0.9)
+                    if self.reset_id:
+                        self.root.after_cancel(self.reset_id)
+                        self.reset_id = None
                     self.label.config(text=msg.get("text", ""))
-                    self.root.deiconify()
-                elif cmd == "fade_out":
-                    self.label.config(text=msg.get("text", ""))
-                    self.root.deiconify()
-                    self.root.attributes("-alpha", 0.9)
-                    if self.fade_id:
-                        self.root.after_cancel(self.fade_id)
-                    # Schedule fade after 7 seconds
-                    self.fade_id = self.root.after(7000, self.do_fade)
-                elif cmd == "hide":
-                    self.root.withdraw()
+                    
+                elif cmd == "show_ready":
+                    if self.reset_id:
+                        self.root.after_cancel(self.reset_id)
+                    self.label.config(text="✅ ready")
+                    # Return to idle after 5 seconds
+                    self.reset_id = self.root.after(5000, self.reset_to_idle)
+                    
                 elif cmd == "quit":
                     self.root.quit()
                     return
