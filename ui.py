@@ -1,4 +1,4 @@
-﻿import tkinter as tk
+import tkinter as tk
 import queue
 
 class WinVoiceUI:
@@ -34,6 +34,16 @@ class WinVoiceUI:
             cursor="hand2"
         )
         self.chk.pack(pady=(0, 5))
+        
+        # Кнопка закрытия
+        def on_close(event=None):
+            self.root.quit()
+            
+        self.close_btn = tk.Label(self.root, text="✖", bg="#2d2d2d", fg="#888888", font=("Segoe UI", 9), cursor="hand2")
+        self.close_btn.place(relx=1.0, rely=0.0, anchor="ne", x=-2, y=2)
+        self.close_btn.bind("<Button-1>", on_close)
+        self.close_btn.bind("<Enter>", lambda e: self.close_btn.config(fg="#ff4444"))
+        self.close_btn.bind("<Leave>", lambda e: self.close_btn.config(fg="#888888"))
         
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()

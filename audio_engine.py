@@ -1,87 +1,107 @@
-﻿import os
-import subprocess
+import numpy as np
+import sounddevice as sd
+import soundfile as sf
 import time
+import os
+import threading
+
 import config
 
 class AudioEngine:
     def __init__(self):
-        self.sox_process = None
+        self.stream = None
+        self.audio_data = []
+        self.sample_rate = 16000
+        self.is_recording = False
+        
+        self.engine_type = config.STT_ENGINE.lower()
+        self.model = None
+        
+        print(f"Initializing STT Engine ({self.engine_type})...")
+        if self.engine_type == "gigaam":
+            try:
+                import onnx_asr
+                model_name = config.GIGAAM_MODEL_PATH if config.GIGAAM_MODEL_PATH else "gigaam-v3-e2e-rnnt"
+                quant = config.GIGAAM_QUANTIZATION if config.GIGAAM_QUANTIZATION else None
+                print(f"Loading GigaAM model: {model_name} (quantization={quant}) ...")
+                self.model = onnx_asr.load_model(model_name, quantization=quant)
+            except Exception as e:
+                print(f"Error loading GigaAM: {e}")
+        else:
+            try:
+                from faster_whisper import WhisperModel
+                model_name = config.WHISPER_MODEL_PATH if config.WHISPER_MODEL_PATH else config.WHISPER_MODEL
+                print(f"Loading Faster-Whisper model: {model_name} ...")
+                self.model = WhisperModel(model_name, device="cpu", compute_type="int8")
+            except Exception as e:
+                print(f"Error loading Whisper: {e}")
+                
+        print("STT Engine is ready.")
+
+    def _audio_callback(self, indata, frames, time_info, status):
+        """Called by sounddevice for each audio block."""
+        if status:
+            pass # ignore warnings
+        if self.is_recording:
+            # indata is shape (frames, channels) -> (frames, 1)
+            self.audio_data.append(indata.copy())
 
     def start_recording(self):
-        if self.sox_process:
-            self.stop_recording()
-        
-        if os.path.exists(config.AUDIO_TEMP_FILE):
-            os.remove(config.AUDIO_TEMP_FILE)
-            
-        print(f"Starting recording with SoX...")
-        cmd = [
-            config.SOX_PATH,
-            "-d", 
-            "-r", "16000",
-            "-c", "1",
-            "-b", "16",
-            config.AUDIO_TEMP_FILE,
-            "silence", "1", "0.1", "1%"
-        ]
-        
-        self.sox_process = subprocess.Popen(cmd)
+        self.audio_data = []
+        self.is_recording = True
+        print("Started recording...")
+        self.stream = sd.InputStream(
+            samplerate=self.sample_rate,
+            channels=1,
+            dtype='float32',
+            callback=self._audio_callback
+        )
+        self.stream.start()
 
     def stop_recording(self):
-        if self.sox_process:
-            print("Stopping SoX...")
-            self.sox_process.terminate()
-            try:
-                self.sox_process.wait(timeout=2)
-            except subprocess.TimeoutExpired:
-                self.sox_process.kill()
-            self.sox_process = None
-            time.sleep(0.1)
+        if self.stream:
+            print("Stopping recording...")
+            self.is_recording = False
+            self.stream.stop()
+            self.stream.close()
+            self.stream = None
 
-    def transcribe(self):
-        print(f"Checking WAV file: {config.AUDIO_TEMP_FILE}")
-        if not os.path.exists(config.AUDIO_TEMP_FILE):
-            print("Error: WAV file does not exist!")
+    def transcribe(self) -> str:
+        if not self.model:
+            print("Error: No STT model loaded.")
             return ""
+            
+        if not self.audio_data:
+            print("Error: No audio data recorded.")
+            return ""
+            
+        # Concatenate audio chunks and flatten to 1D array
+        audio_np = np.concatenate(self.audio_data, axis=0).flatten()
+        duration = len(audio_np) / self.sample_rate
         
-        size = os.path.getsize(config.AUDIO_TEMP_FILE)
-        print(f"WAV size: {size} bytes")
-        if size < 100:
-            print("Error: WAV file is too small (empty)!")
+        if duration < 0.5:
+            print("Error: Audio too short!")
             return ""
-
-        print("Starting Whisper...")
-        cmd = [
-            config.WHISPER_PATH,
-            "-m", config.MODEL_PATH,
-            "-f", config.AUDIO_TEMP_FILE,
-            "-l", "ru",
-            "-otxt",
-            "-np",
-            "-nt"
-        ]
+            
+        print(f"Transcribing audio ({duration:.2f} seconds)...")
         
         try:
-            # We don't hide output so user can see it in console
-            subprocess.run(cmd, timeout=30)
-            
-            possible_txt = [
-                f"{config.AUDIO_TEMP_FILE}.txt",
-                f"{config.TXT_OUTPUT_FILE}.txt",
-                "temp_audio.txt"
-            ]
-            
-            for path in possible_txt:
-                if os.path.exists(path):
-                    print(f"Found transcript file: {path}")
-                    with open(path, "r", encoding="utf-8") as f:
-                        text = f.read().strip()
-                    os.remove(path)
-                    print(f"Whisper transcribed: {text}")
-                    return text
-            
-            print("Error: Whisper finished but NO .txt file was found!")
-            return ""
+            if self.engine_type == "gigaam":
+                # onnx_asr processing
+                text = self.model.recognize(audio_np)
+                if not isinstance(text, str):
+                    text = str(text)
+                
+                print(f"GigaAM output: {text}")
+                return text.strip()
+                
+            else:
+                # faster-whisper processing
+                segments, info = self.model.transcribe(audio_np, language="ru")
+                text = " ".join([segment.text for segment in segments])
+                print(f"Whisper output: {text}")
+                return text.strip()
+                
         except Exception as e:
-            print(f"Whisper Exception: {e}")
+            print(f"Transcription exception: {e}")
             return ""

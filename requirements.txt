@@ -1,0 +1,12 @@
+keyboard
+requests
+pyperclip
+python-dotenv
+sounddevice
+soundfile
+numpy
+scipy
+faster-whisper
+onnxruntime
+onnx-asr
+huggingface-hub

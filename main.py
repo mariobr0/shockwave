@@ -6,6 +6,7 @@ import sys
 import os
 
 import config
+
 from ui import WinVoiceUI
 from audio_engine import AudioEngine
 from llm_normalizer import LLMNormalizer
