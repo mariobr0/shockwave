@@ -31,21 +31,29 @@
 ### 3. First Launch & Configuration
 1. Launch `Shockwave.lnk` (or `start.bat`).
 2. In the Control Panel:
-   * **Option 2 (`Configure API Key & LLM`):** Enter your LLM API key for text normalization.
+   * **Option 2 (`Configure API Key & LLM`):** Set Endpoint URL, API Key, and Model name.
    * **Option 3 (`Select STT Engine`):** Choose `Whisper` (for code / mixed speech) or `GigaAM` (for Russian speech).
    * **Option 4 (`Download / Verify STT Models`):** Download the selected model weights into the local `models/` directory.
    * **Option 5 (`Сменить язык на русский`):** Toggle interface language if needed.
 
-**Manual Configuration via `.env.example` (Optional):**  
-You can also configure all settings manually. Simply copy or rename the template `.env.example` to `.env`:
-```bat
-copy .env.example .env
-```
-and edit the parameters (e.g. change the global hotkey `HOTKEY=f12`, widget position, or local LLM endpoints) in any text editor.
+#### Common LLM Endpoints:
+| Provider | Endpoint URL (`LLM_ENDPOINT`) | Model Name (`LLM_MODEL`) |
+| :--- | :--- | :--- |
+| **Google AI Studio** | `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions` | `gemini-2.5-flash-lite` |
+| **OpenAI** | `https://api.openai.com/v1/chat/completions` | `gpt-4o-mini` |
+| **OpenRouter** | `https://openrouter.ai/api/v1/chat/completions` | `google/gemini-2.5-flash-lite` |
+| **Ollama (Local)** | `http://localhost:11434/v1/chat/completions` | `qwen2.5:7b` |
 
 ---
 
-### 4. Usage
+### 4. Advanced Configuration via `.env` (Optional)
+You can customize additional parameters in `.env` (template provided in `.env.example`):
+* `HOTKEY=f12` — recording hotkey (e.g. `f9`, `ctrl+space`, `alt+v`).
+* `UI_POSITION=bottom-left` — floating widget screen position (`bottom-left`, `bottom-right`, `top-center`).
+
+---
+
+### 5. Usage
 1. In the menu, select **`1. Start Shockwave`** — a floating widget will appear on screen.
 2. Press **`F12`** in any application and speak your text.
 3. Press **`F12`** again to finish recording.
@@ -53,7 +61,7 @@ and edit the parameters (e.g. change the global hotkey `HOTKEY=f12`, widget posi
 
 ---
 
-### 5. Widget Controls
+### 6. Widget Controls
 * **`LLM norm` checkbox:** Toggle AI-based punctuation and typo correction.
 * **`alert` checkbox:** Toggle audio chime notification on completion.
 * **`×` button:** Exit application.

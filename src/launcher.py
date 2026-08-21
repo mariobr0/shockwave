@@ -43,7 +43,7 @@ def ensure_env_exists():
             f.write("GIGAAM_MODEL=gigaam-v3-e2e-rnnt\n")
             f.write("GIGAAM_QUANTIZATION=int8\n")
             f.write("APP_LANGUAGE=en\n")
-            f.write("LLM_ENDPOINT=http://127.0.0.1:8045/v1/chat/completions\n")
+            f.write("LLM_ENDPOINT=\n")
             f.write("LLM_API_KEY=\n")
             f.write("LLM_MODEL=gemini-2.5-flash-lite\n")
             f.write("HOTKEY=f12\n")
@@ -83,19 +83,22 @@ def menu():
             q_suffix = f", {quant}" if quant else ""
             stt_display = f"GigaAM ({gigaam_m}{q_suffix})"
 
+        llm_endpoint = read_env("LLM_ENDPOINT", "")
         llm_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
         llm_key = read_env("LLM_API_KEY", "")
         version = getattr(config, "APP_VERSION", "0.9.0")
         
         if lang == "ru":
+            endpoint_display = llm_endpoint if llm_endpoint else "НЕ УСТАНОВЛЕН"
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "НЕ УСТАНОВЛЕН")
             print("================================================")
             print(f"       SHOCKWAVE v{version} - ПАНЕЛЬ УПРАВЛЕНИЯ     ")
             print("================================================")
             print("Текущие настройки:")
-            print(f"- STT Движок: {stt_display}")
-            print(f"- LLM Модель: {llm_model}")
-            print(f"- Ключ LLM:   {key_display}")
+            print(f"- STT Движок:   {stt_display}")
+            print(f"- LLM Эндпоинт: {endpoint_display}")
+            print(f"- LLM Модель:   {llm_model}")
+            print(f"- Ключ LLM:     {key_display}")
             print("================================================")
             print("1. Запустить Shockwave")
             print("2. Настроить API-ключ и LLM")
@@ -106,14 +109,16 @@ def menu():
             print("================================================")
             prompt_text = "Ваш выбор (1-6): "
         else:
+            endpoint_display = llm_endpoint if llm_endpoint else "NOT SET"
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "NOT SET")
             print("================================================")
             print(f"        SHOCKWAVE v{version} - CONTROL PANEL        ")
             print("================================================")
             print("Current Settings:")
-            print(f"- STT Engine: {stt_display}")
-            print(f"- LLM Model:  {llm_model}")
-            print(f"- LLM Key:    {key_display}")
+            print(f"- STT Engine:   {stt_display}")
+            print(f"- LLM Endpoint: {endpoint_display}")
+            print(f"- LLM Model:    {llm_model}")
+            print(f"- LLM Key:      {key_display}")
             print("================================================")
             print("1. Start Shockwave")
             print("2. Configure API Key & LLM")
@@ -166,35 +171,48 @@ def menu():
             sys.exit(0)
 
 def setup_llm(lang="en"):
+    current_endpoint = read_env("LLM_ENDPOINT", "")
     current_key = read_env("LLM_API_KEY", "")
     current_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
     
     if lang == "ru":
         print("\n--- Настройка LLM ---")
+        print(f"Текущий эндпоинт: {current_endpoint if current_endpoint else 'Отсутствует'}")
+        new_endpoint = input("Введите новый URL эндпоинта (или Enter, чтобы оставить): ").strip()
+        if new_endpoint:
+            update_env("LLM_ENDPOINT", new_endpoint)
+            print("Эндпоинт сохранен!")
+            
         key_info = f"{current_key[:7]}...{current_key[-4:]}" if len(current_key) > 10 else ("Установлен" if current_key else "Отсутствует")
-        print(f"Текущий ключ: {key_info}")
-        new_key = input("Введите новый API-ключ (или Enter, чтобы оставить без изменений): ").strip()
+        print(f"\nТекущий ключ: {key_info}")
+        new_key = input("Введите новый API-ключ (или Enter, чтобы оставить): ").strip()
         if new_key:
             update_env("LLM_API_KEY", new_key)
             print("Ключ сохранен!")
             
-        print(f"Текущая модель: {current_model}")
-        new_model = input("Введите название модели (или Enter, чтобы оставить без изменений): ").strip()
+        print(f"\nТекущая модель: {current_model}")
+        new_model = input("Введите название модели (или Enter, чтобы оставить): ").strip()
         if new_model:
             update_env("LLM_MODEL", new_model)
             print("Модель сохранена!")
         input("\nНажмите Enter для возврата...")
     else:
         print("\n--- LLM Settings ---")
+        print(f"Current Endpoint: {current_endpoint if current_endpoint else 'Not Set'}")
+        new_endpoint = input("Enter new Endpoint URL (or press Enter to keep): ").strip()
+        if new_endpoint:
+            update_env("LLM_ENDPOINT", new_endpoint)
+            print("Endpoint saved!")
+            
         key_info = f"{current_key[:7]}...{current_key[-4:]}" if len(current_key) > 10 else ("Set" if current_key else "Not Set")
-        print(f"Current API Key: {key_info}")
-        new_key = input("Enter new API Key (or press Enter to keep current): ").strip()
+        print(f"\nCurrent API Key: {key_info}")
+        new_key = input("Enter new API Key (or press Enter to keep): ").strip()
         if new_key:
             update_env("LLM_API_KEY", new_key)
             print("API Key saved!")
             
-        print(f"Current LLM Model: {current_model}")
-        new_model = input("Enter model name (or press Enter to keep current): ").strip()
+        print(f"\nCurrent Model: {current_model}")
+        new_model = input("Enter model name (or press Enter to keep): ").strip()
         if new_model:
             update_env("LLM_MODEL", new_model)
             print("Model saved!")

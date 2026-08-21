@@ -6,6 +6,10 @@ class LLMNormalizer:
         if not text:
             return ""
             
+        if not config.LLM_ENDPOINT:
+            print("Notice: LLM Endpoint is not configured. Returning raw transcript.")
+            return text
+            
         headers = {
             "Content-Type": "application/json"
         }
