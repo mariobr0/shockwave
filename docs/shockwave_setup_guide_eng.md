@@ -1,47 +1,44 @@
-# Shockwave — Setup Guide
+# Shockwave (v0.9.0) — Setup & User Guide
 
-The application supports two installation methods: **Simple** (for regular users) and **Advanced** (for developers who want to work with the source code).
+## Option 1. Quick Start (Standalone Executable)
 
----
+The fastest and easiest way to use Shockwave without installing Python or configuring virtual environments manually.
 
-## Option 1. Simple Installation (Standalone EXE)
+### Step 1: Launch
+1. Double-click `Shockwave.lnk` (the root shortcut) or run `dist\Shockwave.exe`.
+2. The interactive **Shockwave Control Panel** will open in the console.
 
-This is the fastest way to run Shockwave without installing Python or any third-party libraries.
+### Step 2: Configure API Key & LLM
+In the Control Panel, select option **`2. Configure API Key & LLM`**:
+* Enter your LLM API Key (e.g. Google Gemini API key).
+* Choose or leave the default model `gemini-2.5-flash-lite`.
+* Settings are automatically saved into your local `.env` file.
 
-### Step 1: Download
-1. Download the `Shockwave.exe` file (found in the `dist` folder if you built the project yourself, or in the GitHub releases).
-2. Place it in any convenient folder on your PC.
+### Step 3: Select and Download STT Models
+1. Choose option **`3. Select STT Engine`**:
+   * **Whisper** — Recommended for mixed English/Russian speech, coding terms, and acronyms.
+   * **GigaAM** — Recommended for ultra-fast Russian speech.
+2. Select option **`4. Download / Verify STT Models`** to download required weights directly into the project's local `models/` directory.
 
-### Step 2: Configure API Key (.env)
-Next to the `Shockwave.exe` file, create a text file named `.env` (note the leading dot) and add your LLM API key (e.g., Gemini) to it:
-
-```env
-LLM_API_KEY=your_key_here
-STT_ENGINE=gigaam
-```
-
-*Valid values for `STT_ENGINE` are `whisper` or `gigaam`.*
-
-### Step 3: Launch
-Double-click `Shockwave.exe`.
-1. On the first launch, the **Control Panel (Launcher)** will open in the console.
-2. The program will automatically download the necessary speech recognition neural network (Whisper or GigaAM) to your system cache. (Note: the first download may take some time and require up to 2-3 GB of free space).
-3. Select "Start Shockwave" from the menu.
-4. Wait for the black widget to appear on screen.
-5. Press `F12` to start speech recognition.
+### Step 4: Start Dictating
+1. Choose option **`1. Start Shockwave`**.
+2. A minimalist floating widget will appear showing `what is your command?`.
+3. Press **`F12`** in any Windows application and speak your text.
+4. Press **`F12`** again to finish recording.
+5. When the status displays **`ready`** (accompanied by a chime sound), the text is copied to your clipboard — simply press **`Ctrl + V`** to paste!
 
 ---
 
-## Option 2. Advanced Installation (Source Code)
+## Option 2. Developer Setup (From Source Code)
 
-Use this option if you want to modify the code or rebuild the `.exe` file yourself.
+Use this method if you want to develop features, modify the codebase, or build a custom standalone binary.
 
-### Requirements
-* OS: Windows 10/11
-* Python 3.10 or newer
+### System Requirements
+* Windows 10 / 11
+* Python 3.10+
 
-### Step 1: Install Dependencies
-Clone the repository and install the libraries:
+### Step 1: Environment Setup
+Clone the repository and set up your virtual environment:
 
 ```bat
 python -m venv venv
@@ -49,37 +46,22 @@ call venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Step 2: Environment Setup
-Copy the configuration example:
+### Step 2: Configuration (.env)
+Create your local environment file:
 ```bat
 copy .env.example .env
 ```
-Edit `.env` and insert your `LLM_API_KEY`.
+Add your `LLM_API_KEY` into `.env` (or configure it via the interactive menu).
 
-### Step 3: Run from Source
-To run via Python, use:
+### Step 3: Run in Development Mode
 ```bat
 python src/launcher.py
 ```
-Or simply run `start.bat`.
+*(Or simply double-click `start.bat`)*.
 
-### Step 4: Build Your Own EXE
-If you made changes to the code and want to build a new standalone `Shockwave.exe`, run:
+### Step 4: Build Standalone Executable
+To compile everything into a single portable `.exe` with embedded icons and assets:
 ```bat
 build.bat
 ```
-The script will automatically install `PyInstaller`, add all necessary hidden imports and metadata, and then compile the project. The finished file will appear in the `dist` folder.
-
----
-
-## Using the Application
-
-* **F12 (hold or press)** — start/stop recording.
-* The floating widget displays the current status:
-  * `what is your command?` — waiting for input.
-  * `record` — recording audio from the microphone.
-  * `processing` — speech-to-text (STT) conversion.
-  * `normalization` — fixing punctuation via LLM.
-  * `ready` — text successfully copied to clipboard.
-* The checkbox on the widget allows you to toggle AI normalization on the fly. When unchecked, the raw recognized text is copied immediately without waiting for LLM requests.
-* To close the application completely, click the red cross (✖) on the widget.
+The script will build `dist\Shockwave.exe` and generate the `Shockwave.lnk` shortcut in the project root.
