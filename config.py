@@ -6,6 +6,7 @@ load_dotenv()
 STT_ENGINE = os.getenv("STT_ENGINE", "whisper")
 WHISPER_MODEL = os.getenv("WHISPER_MODEL", "large-v3-turbo")
 WHISPER_MODEL_PATH = os.getenv("WHISPER_MODEL_PATH", "")
+GIGAAM_MODEL = os.getenv("GIGAAM_MODEL", "gigaam-v3-e2e-rnnt")
 GIGAAM_MODEL_PATH = os.getenv("GIGAAM_MODEL_PATH", "")
 GIGAAM_QUANTIZATION = os.getenv("GIGAAM_QUANTIZATION", "")
 

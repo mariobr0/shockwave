@@ -2,11 +2,16 @@
 
 ![Shockwave](shockwave.jpg)
 
-*(Scroll down for Russian version)*
+*(Scroll down for Russian version / Прокрутите вниз, чтобы прочесть версию на русском языке)*
 
-**Shockwave** is a background tool for voice dictation on Windows. It allows you to dictate text by pressing a global hotkey, corrects punctuation using an LLM, and copies the text to your clipboard.
+**Shockwave** is a background voice dictation tool for Windows. It allows you to dictate text via a global hotkey, fixes punctuation using an LLM, and copies the resulting text to your clipboard.
 
-A local alternative to tools like FluidVoice for Windows.
+### Speech Recognition Models (STT):
+- **Whisper (`large-v3-turbo`)**: The latest turbo version of OpenAI's large Whisper model, optimized for fast performance. Runs locally via the `faster-whisper` engine.
+- **GigaAM (`gigaam-v3-e2e-rnnt`)**: ONNX version of Sber's GigaAM neural network, ported by Ilya Stupakov for CPU execution. Loaded in `int8` or `float32` format via the `onnx-asr` library.
+
+### Text Normalization Engine (LLM):
+- **Gemini (`gemini-2.5-flash-lite`)**: A lightweight and ultra-fast model from Google's Gemini lineup. Used for punctuation restoration, formatting, and IT terminology correction.
 
 ## Features
 * **Global Hotkey:** Default `F12`. Works in any application.
@@ -26,12 +31,17 @@ Detailed instructions are available in the setup guides:
 
 **Shockwave** — это инструмент для голосовой диктовки на Windows, работающий в фоновом режиме. Он позволяет надиктовывать текст по нажатию глобальной клавиши, исправляет пунктуацию с помощью LLM и копирует текст в буфер обмена.
 
-Локальная альтернатива FluidVoice для Windows.
+### Модели распознавания речи (STT):
+- **Whisper (`large-v3-turbo`)**: Новая турбо-версия большой модели Whisper от OpenAI, оптимизированная для быстрой работы. Запускается через движок `faster-whisper`.
+- **GigaAM (`gigaam-v3-e2e-rnnt`)**: ONNX-версия нейросети GigaAM от Сбера, портированная Ильей Ступаковым для работы на процессорах. Загружается в версии `int8` или `float32` через библиотеку `onnx-asr`.
+
+### Движок нормализации текста (LLM):
+- **Gemini (`gemini-2.5-flash-lite`)**: Легкая и быстрая модель из линейки Gemini от Google. Используется для расстановки запятых, форматирования и исправления IT-терминов.
 
 ## Возможности
 * **Глобальная кнопка:** По умолчанию `F12`. Работает в любом приложении.
 * **Два движка распознавания (STT):** Использует `faster-whisper` (отлично для смешанного англо-русского IT-кода) или `GigaAM` (очень быстрый для чистого русского языка). Оба работают локально.
-* **Нормализация:** LLM (например, Gemini или локальная модель) расставляет запятые, исправляет опечатки и капитализирует термины.
+* **Нормализация:** LLM (например, Gemini или локальная модель) расставляет запятые, исправляет опечатки и форматирует термины.
 * **Интерактивный UI:** Плавающий виджет с галочкой для включения/выключения ИИ-коррекции.
 * **Бекап-лог:** Консоль сохраняет историю расшифровок, не позволяя потерять текст.
 

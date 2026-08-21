@@ -32,7 +32,7 @@ class AudioEngine:
         if self.engine_type == "gigaam":
             try:
                 import onnx_asr
-                model_name = config.GIGAAM_MODEL_PATH if config.GIGAAM_MODEL_PATH else "gigaam-v3-e2e-rnnt"
+                model_name = config.GIGAAM_MODEL_PATH if config.GIGAAM_MODEL_PATH else config.GIGAAM_MODEL
                 quant = config.GIGAAM_QUANTIZATION if config.GIGAAM_QUANTIZATION else None
                 print(f"Loading GigaAM model: {model_name} (quantization={quant}) ...")
                 self.model = onnx_asr.load_model(model_name, quantization=quant)
