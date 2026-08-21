@@ -16,11 +16,12 @@
 ## Features
 * **Global Hotkey:** Default `F12`. Works across any Windows application.
 * **Dual Speech-to-Text (STT):** Choose between Whisper (mixed IT speech) and GigaAM (ultra-fast Russian speech).
-* **Fully Portable & Offline Ready:** All downloaded neural network models are stored locally inside the project's `models/` directory.
-* **Bilingual Interactive Launcher:** Console control panel supporting language switching (English / Russian), model management, and API key configuration.
-* **Minimalist Floating Widget:** Clean on-screen status indicators with checkboxes to toggle LLM normalization and audio alerts.
+* **Fully Portable & Compact Storage:** Flat directory structure saves weights locally in `models/` with zero bloat (only ~1.76 GB for both neural networks).
+* **Draggable Floating Widget:** Minimalist on-screen overlay that can be smoothly repositioned across any screen using the left grip handle (`⋮⋮`).
+* **Permanent Taskbar Presence:** Clean window lifecycle with permanent icon visibility on Windows Taskbar and smooth flicker-free startup.
+* **Bilingual Interactive Launcher:** Console control panel supporting language switching (English / Russian), model management, and transparent API configuration.
 * **Audio Notifications:** Subtle sound notification plays when transcription is copied and ready to paste.
-* **Safe Terminal Logging:** The console maintains a real-time transcript history to ensure no dictated text is lost in current session.
+* **Safe Terminal Logging:** The console maintains a real-time transcript history to ensure no dictated text is lost.
 
 ## Documentation & Installation
 Detailed guides are available below:
@@ -44,11 +45,12 @@ Detailed guides are available below:
 ## Возможности
 * **Глобальная кнопка:** По умолчанию `F12`. Работает в любых программах Windows.
 * **Два движка распознавания (STT):** Быстрый выбор между Whisper (для смешанной IT-речи) и GigaAM (очень быстрый для русской речи).
-* **Полная портативность:** Все скачиваемые модели сохраняются локально в папку `models/` внутри проекта.
-* **Двуязычная панель управления:** Консольный лаунчер с поддержкой переключения языка (RU / EN), проверки моделей и настройки API-ключа.
-* **Минималистичный виджет:** Аккуратная плашка статуса с переключателями LLM-нормализации и звуковых оповещений.
+* **Полная портативность и компактность:** Оптимизированная структура хранения моделей в `models/` без дубликатов (всего ~1.76 ГБ для двух моделей).
+* **Перемещаемый виджет:** Аккуратная плашка статуса, которую можно свободно перетаскивать мышкой за левую ручку (`⋮⋮`) в любое место любого экрана.
+* **Постоянная иконка в таскбаре:** Плавный запуск без мерцаний и постоянное отображение иконки приложения на панели задач Windows.
+* **Двуязычная панель управления:** Консольный лаунчер с поддержкой переключения языка (RU / EN), проверки моделей и прозрачной настройки эндпоинта и ключа.
 * **Звуковой сигнал:** Аудио-оповещение при успешном завершении диктовки.
-* **Бекап-лог:** Консоль сохраняет лог и всю историю расшифровок, исключая потерю надиктованного текста в рамках открытой сессии.
+* **Бекап-лог:** Консоль сохраняет лог и всю историю расшифровок в рамках открытой сессии.
 
 ## Документация и Установка
 Подробные инструкции по установке:

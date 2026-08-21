@@ -63,6 +63,7 @@ You can customize additional parameters in `.env` (template provided in `.env.ex
 ---
 
 ### 6. Widget Controls
+* **Left grip handle (`⋮⋮`):** Click and drag with mouse to reposition the widget anywhere on your desktop.
 * **`LLM norm` checkbox:** Toggle AI-based punctuation and typo correction.
 * **`alert` checkbox:** Toggle audio chime notification on completion.
 * **`×` button:** Exit application.
