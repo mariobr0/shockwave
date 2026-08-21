@@ -5,8 +5,13 @@ import sys
 import winsound
 
 def get_resource_path(relative_path):
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-    return os.path.join(base_path, relative_path)
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    candidate = os.path.join(root_path, relative_path)
+    if os.path.exists(candidate):
+        return candidate
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
 
 def play_ready_sound():
     sound_path = get_resource_path(os.path.join("alert", "ready.wav"))

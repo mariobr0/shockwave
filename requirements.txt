@@ -10,3 +10,5 @@ faster-whisper
 onnxruntime
 onnx-asr
 huggingface-hub
+pillow
+av

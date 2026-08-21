@@ -3,8 +3,19 @@ import sys
 import subprocess
 from dotenv import load_dotenv, set_key
 
+# Гарантируем, что модули из src корректно импортируются
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
+
 def get_env_path():
-    return os.path.join(os.path.dirname(__file__), ".env")
+    if getattr(sys, 'frozen', False):
+        return os.path.join(os.path.dirname(sys.executable), ".env")
+    root_dir = os.path.abspath(os.path.join(current_dir, ".."))
+    candidate = os.path.join(root_dir, ".env")
+    if os.path.exists(candidate) or not os.path.exists(".env"):
+        return candidate
+    return ".env"
 
 def ensure_env_exists():
     env_path = get_env_path()

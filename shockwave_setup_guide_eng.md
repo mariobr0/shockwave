@@ -59,7 +59,7 @@ Edit `.env` and insert your `LLM_API_KEY`.
 ### Step 3: Run from Source
 To run via Python, use:
 ```bat
-python launcher.py
+python src/launcher.py
 ```
 Or simply run `start.bat`.
 

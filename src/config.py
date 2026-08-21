@@ -1,7 +1,9 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv()
+# Загружаем .env из текущей директории или из родительской (корня проекта)
+env_path = ".env" if os.path.exists(".env") else os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
+load_dotenv(env_path)
 
 STT_ENGINE = os.getenv("STT_ENGINE", "whisper")
 WHISPER_MODEL = os.getenv("WHISPER_MODEL", "large-v3-turbo")

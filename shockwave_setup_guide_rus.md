@@ -57,7 +57,7 @@ copy .env.example .env
 ### Шаг 3: Запуск из исходников
 Для запуска через Python используйте:
 ```bat
-python launcher.py
+python src/launcher.py
 ```
 Либо просто запустите `start.bat`.
 
