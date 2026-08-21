@@ -41,19 +41,36 @@ class WinVoiceUI:
                 
         self.root.overrideredirect(True)
         self.root.attributes("-topmost", True)
-        self.root.attributes("-alpha", 0.9)
-        self.root.configure(bg="#2d2d2d")
+        
+        # 80% opacity
+        self.root.attributes("-alpha", 0.80)
+        
+        # Shockwave signature purple palette
+        self.COLOR_BG = "#643884"
+        self.COLOR_GRIP = "#4d2769"
+        self.COLOR_GRIP_HOVER = "#6f3f93"
+        self.COLOR_TEXT = "#ffffff"
+        self.COLOR_MUTED = "#cfb7e6"
+        
+        self.COLOR_INACTIVE_FILL = "#402257"
+        self.COLOR_INACTIVE_OUTLINE = "#FFD700"
+        self.COLOR_HOVER_FILL = "#7b47a3"
+        self.COLOR_HOVER_OUTLINE = "#FFF59D"
+        self.COLOR_ACTIVE_FILL = "#FFD700"
+        self.COLOR_ACTIVE_OUTLINE = "#FFD700"
+        
+        self.root.configure(bg=self.COLOR_BG)
         
         # --- 1. Left Grip / Drag Handle ---
-        self.grip = tk.Frame(self.root, bg="#3a3a3a", width=16, cursor="fleur")
+        self.grip = tk.Frame(self.root, bg=self.COLOR_GRIP, width=16, cursor="fleur")
         self.grip.pack(side="left", fill="y")
         self.grip.pack_propagate(False)
         
         self.grip_label = tk.Label(
             self.grip,
             text="⋮\n⋮",
-            bg="#3a3a3a",
-            fg="#777777",
+            bg=self.COLOR_GRIP,
+            fg=self.COLOR_MUTED,
             font=("Segoe UI", 8, "bold"),
             cursor="fleur"
         )
@@ -75,11 +92,11 @@ class WinVoiceUI:
         for widget in (self.grip, self.grip_label):
             widget.bind("<Button-1>", start_drag)
             widget.bind("<B1-Motion>", do_drag)
-            widget.bind("<Enter>", lambda e: (self.grip.config(bg="#484848"), self.grip_label.config(bg="#484848", fg="#cccccc")))
-            widget.bind("<Leave>", lambda e: (self.grip.config(bg="#3a3a3a"), self.grip_label.config(bg="#3a3a3a", fg="#777777")))
+            widget.bind("<Enter>", lambda e: (self.grip.config(bg=self.COLOR_GRIP_HOVER), self.grip_label.config(bg=self.COLOR_GRIP_HOVER, fg="#ffffff")))
+            widget.bind("<Leave>", lambda e: (self.grip.config(bg=self.COLOR_GRIP), self.grip_label.config(bg=self.COLOR_GRIP, fg=self.COLOR_MUTED)))
             
         # --- 2. Fixed Shockwave Eye Column (32px diameter) ---
-        self.eye_frame = tk.Frame(self.root, bg="#2d2d2d", width=44)
+        self.eye_frame = tk.Frame(self.root, bg=self.COLOR_BG, width=44)
         self.eye_frame.pack(side="left", fill="y", padx=(6, 2))
         self.eye_frame.pack_propagate(False)
         
@@ -87,19 +104,11 @@ class WinVoiceUI:
             self.eye_frame,
             width=32,
             height=32,
-            bg="#2d2d2d",
+            bg=self.COLOR_BG,
             highlightthickness=0,
             cursor="hand2"
         )
         self.eye_canvas.place(relx=0.5, rely=0.5, anchor="center")
-        
-        # Color palettes
-        self.COLOR_INACTIVE_FILL = "#333333"
-        self.COLOR_INACTIVE_OUTLINE = "#FFD700"
-        self.COLOR_HOVER_FILL = "#505050"
-        self.COLOR_HOVER_OUTLINE = "#FFF59D"
-        self.COLOR_ACTIVE_FILL = "#FFD700"
-        self.COLOR_ACTIVE_OUTLINE = "#FFD700"
         
         self.is_eye_active = False
         
@@ -137,15 +146,15 @@ class WinVoiceUI:
         self.eye_canvas.bind("<Leave>", on_eye_leave)
         
         # --- 3. Right Content Column (Status Text + Controls) ---
-        self.right_frame = tk.Frame(self.root, bg="#2d2d2d")
+        self.right_frame = tk.Frame(self.root, bg=self.COLOR_BG)
         self.right_frame.pack(side="left", fill="both", expand=True, padx=(2, 6), pady=4)
         
         self.idle_text = "what is your command?"
         self.label = tk.Label(
             self.right_frame,
             text=self.idle_text,
-            bg="#2d2d2d",
-            fg="white",
+            bg=self.COLOR_BG,
+            fg=self.COLOR_TEXT,
             font=("Segoe UI", 9),
             anchor="w",
             cursor="hand2"
@@ -156,7 +165,7 @@ class WinVoiceUI:
         self.label.bind("<Leave>", on_eye_leave)
         
         # Checkbox controls container
-        self.controls_frame = tk.Frame(self.right_frame, bg="#2d2d2d")
+        self.controls_frame = tk.Frame(self.right_frame, bg=self.COLOR_BG)
         self.controls_frame.pack(fill="x")
         
         # LLM norm checkbox
@@ -170,11 +179,11 @@ class WinVoiceUI:
             text="LLM norm",
             variable=self.use_llm_var,
             command=toggle_llm,
-            bg="#2d2d2d",
-            fg="#aaaaaa",
-            selectcolor="#2d2d2d",
-            activebackground="#2d2d2d",
-            activeforeground="white",
+            bg=self.COLOR_BG,
+            fg=self.COLOR_MUTED,
+            selectcolor=self.COLOR_GRIP,
+            activebackground=self.COLOR_BG,
+            activeforeground="#ffffff",
             font=("Segoe UI", 8),
             cursor="hand2",
             padx=0
@@ -192,11 +201,11 @@ class WinVoiceUI:
             text="alert",
             variable=self.use_alert_var,
             command=toggle_alert,
-            bg="#2d2d2d",
-            fg="#aaaaaa",
-            selectcolor="#2d2d2d",
-            activebackground="#2d2d2d",
-            activeforeground="white",
+            bg=self.COLOR_BG,
+            fg=self.COLOR_MUTED,
+            selectcolor=self.COLOR_GRIP,
+            activebackground=self.COLOR_BG,
+            activeforeground="#ffffff",
             font=("Segoe UI", 8),
             cursor="hand2",
             padx=0
@@ -207,11 +216,11 @@ class WinVoiceUI:
         def on_close(event=None):
             self.root.quit()
             
-        self.close_btn = tk.Label(self.root, text="×", bg="#2d2d2d", fg="#888888", font=("Segoe UI", 10, "bold"), cursor="hand2")
+        self.close_btn = tk.Label(self.root, text="×", bg=self.COLOR_BG, fg=self.COLOR_MUTED, font=("Segoe UI", 10, "bold"), cursor="hand2")
         self.close_btn.place(relx=1.0, rely=0.0, anchor="ne", x=-3, y=1)
         self.close_btn.bind("<Button-1>", on_close)
-        self.close_btn.bind("<Enter>", lambda e: self.close_btn.config(fg="#ff4444"))
-        self.close_btn.bind("<Leave>", lambda e: self.close_btn.config(fg="#888888"))
+        self.close_btn.bind("<Enter>", lambda e: self.close_btn.config(fg="#ff5555"))
+        self.close_btn.bind("<Leave>", lambda e: self.close_btn.config(fg=self.COLOR_MUTED))
         
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
@@ -240,7 +249,7 @@ class WinVoiceUI:
         self.check_queue()
 
     def set_eye_active(self, is_active):
-        """Switches between solid yellow (active) and gray with yellow outline (inactive)."""
+        """Switches between solid yellow (active) and purple with yellow outline (inactive)."""
         self.is_eye_active = is_active
         if is_active:
             self.eye_canvas.itemconfig(
@@ -301,7 +310,7 @@ class WinVoiceUI:
                         # Glow solid yellow when active
                         self.set_eye_active(True)
                     else:
-                        # Return to gray with yellow outline
+                        # Return to inactive state
                         self.set_eye_active(False)
                     
                 elif cmd == "show_ready":
@@ -309,7 +318,7 @@ class WinVoiceUI:
                         self.root.after_cancel(self.reset_id)
                     self.label.config(text="ready")
                     
-                    # Becomes gray again on ready
+                    # Becomes inactive on ready
                     self.set_eye_active(False)
                     
                     # Play sound on ready
