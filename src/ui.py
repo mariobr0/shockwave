@@ -157,3 +157,6 @@ class WinVoiceUI:
             pass
         finally:
             self.root.after(100, self.check_queue)
+
+    def run(self):
+        self.root.mainloop()
