@@ -27,6 +27,9 @@ class WinVoiceUI:
         self.queue = message_queue
         self.root = tk.Tk()
         
+        # Hide window immediately during setup to avoid top-left blank flash
+        self.root.withdraw()
+        
         # Set window icon
         icon_path = get_resource_path(os.path.join("icons", "icon.ico"))
         if os.path.exists(icon_path):
@@ -39,9 +42,6 @@ class WinVoiceUI:
         self.root.attributes("-topmost", True)
         self.root.attributes("-alpha", 0.9)
         self.root.configure(bg="#2d2d2d")
-        
-        # Force permanent taskbar icon for frameless window on Windows
-        self.make_taskbar_icon()
         
         # --- Left Grip / Drag Handle ---
         self.grip = tk.Frame(self.root, bg="#3a3a3a", width=18, cursor="fleur")
@@ -161,11 +161,14 @@ class WinVoiceUI:
             
         self.root.geometry(f"{width}x{height}+{x}+{y}")
         
+        # Configure permanent taskbar icon style before showing
+        self.setup_taskbar_style()
+        
         self.reset_id = None
         self.check_queue()
 
-    def make_taskbar_icon(self):
-        """Forces the frameless Tkinter window to always appear on Windows Taskbar."""
+    def setup_taskbar_style(self):
+        """Applies WS_EX_APPWINDOW to ensure permanent taskbar presence."""
         try:
             self.root.update_idletasks()
             GWL_EXSTYLE = -20
@@ -179,12 +182,13 @@ class WinVoiceUI:
             style = ctypes.windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
             style = (style & ~WS_EX_TOOLWINDOW) | WS_EX_APPWINDOW
             ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style)
-            
-            # Refresh window to apply taskbar style
-            self.root.withdraw()
-            self.root.deiconify()
         except Exception as e:
-            print(f"Taskbar icon notice: {e}")
+            print(f"Taskbar style notice: {e}")
+
+    def show_window(self):
+        """Displays the ready widget in its exact geometry smoothly."""
+        self.root.deiconify()
+        self.setup_taskbar_style()
 
     def reset_to_idle(self):
         self.label.config(text=self.idle_text)
@@ -223,4 +227,5 @@ class WinVoiceUI:
             self.root.after(100, self.check_queue)
 
     def run(self):
+        self.show_window()
         self.root.mainloop()
