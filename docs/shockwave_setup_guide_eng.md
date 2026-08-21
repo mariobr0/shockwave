@@ -48,22 +48,26 @@
 
 ### 4. Advanced Configuration via `.env` (Optional)
 You can customize additional parameters in `.env` (template provided in `.env.example`):
+* `HOTKEY=f12` — system global hotkey (e.g. `f9`, `ctrl+space`, `alt+v`).
 * `WHISPER_LANGUAGE=ru` — Whisper recognition language (`ru`, `auto` for auto-detecting 99 languages, `en`, `de`, etc.).
-* `HOTKEY=f12` — recording hotkey (e.g. `f9`, `ctrl+space`, `alt+v`).
 * `UI_POSITION=bottom-left` — floating widget screen position (`bottom-left`, `bottom-right`, `top-center`).
 
 ---
 
 ### 5. Usage
 1. In the menu, select **`1. Start Shockwave`** — a floating widget will appear on screen.
-2. Press **`F12`** in any application and speak your text.
-3. Press **`F12`** again to finish recording.
-4. When the status displays **`ready`** (accompanied by a chime), the formatted text is already in your clipboard (`Ctrl + V`).
+2. To start dictating:
+   * Press system hotkey **`F12`** in any Windows application, **OR**
+   * Click the **Shockwave Eye** button on the floating widget.
+3. While recording, the eye will ignite in **vibrant yellow** 🟡.
+4. Press **`F12`** (or click the eye) again to finish recording.
+5. When the status displays **`ready`** (accompanied by an emerald glow and chime), the formatted text is already in your clipboard (`Ctrl + V`).
 
 ---
 
 ### 6. Widget Controls
 * **Left grip handle (`⋮⋮`):** Click and drag with mouse to reposition the widget anywhere on your desktop.
+* **Shockwave Eye (🟡):** Interactive recording button with visual state color indicators.
 * **`LLM norm` checkbox:** Toggle AI-based punctuation and typo correction.
 * **`alert` checkbox:** Toggle audio chime notification on completion.
 * **`×` button:** Exit application.

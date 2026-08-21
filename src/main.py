@@ -1,7 +1,6 @@
 import threading
 import queue
 import time
-import keyboard
 import sys
 import os
 
@@ -11,11 +10,11 @@ from ui import WinVoiceUI
 from audio_engine import AudioEngine
 from llm_normalizer import LLMNormalizer
 from typer import Typer
+from hotkey_manager import SystemHotkeyManager
 
 class WinVoiceApp:
     def __init__(self):
         self.q = queue.Queue()
-        self.ui = WinVoiceUI(self.q, position=config.UI_POSITION)
         self.audio = AudioEngine()
         self.llm = LLMNormalizer()
         self.typer = Typer()
@@ -24,10 +23,14 @@ class WinVoiceApp:
         self.is_processing = False
         self.lock = threading.Lock()
         
-        keyboard.add_hotkey(config.HOTKEY, self.on_hotkey, suppress=True)
-        print(f"Shockwave started. Press {config.HOTKEY.upper()} to record.")
+        # Initialize UI with click-to-trigger handler
+        self.ui = WinVoiceUI(self.q, position=config.UI_POSITION, on_trigger=self.toggle_recording)
+        
+        # Register permanent system-level hotkey via Win32 RegisterHotKey
+        self.hotkey_mgr = SystemHotkeyManager(config.HOTKEY, self.toggle_recording)
+        print(f"Shockwave started. Press {config.HOTKEY.upper()} or click the Eye to record.")
 
-    def on_hotkey(self):
+    def toggle_recording(self):
         with self.lock:
             if self.is_processing:
                 return
@@ -71,6 +74,8 @@ class WinVoiceApp:
             self.is_recording = False
 
     def cleanup(self):
+        if hasattr(self, 'hotkey_mgr'):
+            self.hotkey_mgr.stop()
         self.audio.stop_recording()
         if os.path.exists(config.AUDIO_TEMP_FILE):
             try:

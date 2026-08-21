@@ -6,7 +6,7 @@
 
 *(Описание на русском ниже)*
 
-**Shockwave** is an open-source, local-first background voice dictation tool for Windows. It allows you to dictate text via a global hotkey, automatically normalizes punctuation and tech terminology using an LLM, and copies the resulting text directly to your clipboard.
+**Shockwave** is an open-source, local-first background voice dictation tool for Windows. It allows you to dictate text via a global hotkey or by clicking the on-screen glowing eye, automatically normalizes punctuation and tech terminology using an LLM, and copies the resulting text directly to your clipboard.
 
 ### Speech Recognition Models (STT):
 - **Whisper (`large-v3-turbo`)**: State-of-the-art turbo model by OpenAI, optimized for speed. Ideal for mixed English/Russian speech and programming terminology. Runs locally via `faster-whisper`.
@@ -16,7 +16,8 @@
 - **Gemini (`gemini-2.5-flash-lite`) / OpenAI Compatible**: Lightweight, fast AI model used for punctuation restoration, formatting, and technical term capitalization.
 
 ## Features
-* **Global Hotkey:** Default `F12`. Works across any Windows application.
+* **Rock-Solid System Hotkey:** Uses native Win32 `RegisterHotKey` (Default `F12`). Never drops out after system sleep, lock screen, or long background sessions.
+* **Interactive Shockwave Eye:** Interactive glowing eye button on the widget that ignites in vibrant yellow (`#FFD700`) during recording. Click-to-record supported!
 * **Dual Speech-to-Text (STT):** Choose between Whisper (mixed IT speech) and GigaAM (ultra-fast Russian speech).
 * **Fully Portable & Compact Storage:** Flat directory structure saves weights locally in `models/` with zero bloat (only ~1.76 GB for both neural networks).
 * **Draggable Floating Widget:** Minimalist on-screen overlay that can be smoothly repositioned across any screen using the left grip handle (`⋮⋮`).
@@ -35,7 +36,7 @@ Detailed guides are available below:
 
 # Shockwave
 
-**Shockwave** — это легковесный инструмент для голосовой диктовки на Windows, работающий в фоновом режиме. Он позволяет надиктовывать текст по нажатию глобальной горячей клавиши, автоматически расставляет знаки препинания с помощью нейросети и копирует результат в буфер обмена.
+**Shockwave** — это легковесный инструмент для голосовой диктовки на Windows, работающий в фоновом режиме. Он позволяет надиктовывать текст по нажатию глобальной горячей клавиши или клику по светящемуся глазу на панели, автоматически расставляет знаки препинания с помощью нейросети и копирует результат в буфер обмена.
 
 ### Модели распознавания речи (STT):
 - **Whisper (`large-v3-turbo`)**: Новая турбо-версия большой модели Whisper от OpenAI. Идеальна для смешанной русско-английской речи и IT-терминов. Запускается локально через `faster-whisper`.
@@ -45,7 +46,8 @@ Detailed guides are available below:
 - **Gemini (`gemini-2.5-flash-lite`) / OpenAI-совместимый**: Быстрая языковая модель от Google для восстановления пунктуации, форматирования и исправления опечаток.
 
 ## Возможности
-* **Глобальная кнопка:** По умолчанию `F12`. Работает в любых программах Windows.
+* **Надёжная системная горячая клавиша:** Работает через ядро Windows (`RegisterHotKey`, по умолчанию `F12`). Никогда не отваливается после сна или блокировки экрана.
+* **Интерактивный «Глаз Shockwave»:** Светящийся глаз-кнопка на виджете, вспыхивающий ярко-жёлтым светом (`#FFD700`) во время записи. Поддерживает запуск диктовки кликом мыши!
 * **Два движка распознавания (STT):** Быстрый выбор между Whisper (для смешанной IT-речи) и GigaAM (очень быстрый для русской речи).
 * **Полная портативность и компактность:** Оптимизированная структура хранения моделей в `models/` без дубликатов (всего ~1.76 ГБ для двух моделей).
 * **Перемещаемый виджет:** Аккуратная плашка статуса, которую можно свободно перетаскивать мышкой за левую ручку (`⋮⋮`) в любое место любого экрана.

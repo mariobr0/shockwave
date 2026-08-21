@@ -23,8 +23,9 @@ def play_ready_sound():
             print(f"Audio playback error: {e}")
 
 class WinVoiceUI:
-    def __init__(self, message_queue, position="bottom-left"):
+    def __init__(self, message_queue, position="bottom-left", on_trigger=None):
         self.queue = message_queue
+        self.on_trigger = on_trigger
         self.root = tk.Tk()
         
         # Hide window immediately during setup to avoid top-left blank flash
@@ -81,13 +82,38 @@ class WinVoiceUI:
         self.content_frame = tk.Frame(self.root, bg="#2d2d2d")
         self.content_frame.pack(side="left", fill="both", expand=True)
         
+        # Top Status Row (Shockwave Eye + Text)
+        self.status_row = tk.Frame(self.content_frame, bg="#2d2d2d", cursor="hand2")
+        self.status_row.pack(pady=(4, 0))
+        
+        # Shockwave Glowing Eye Canvas Button
+        self.eye_canvas = tk.Canvas(self.status_row, width=18, height=18, bg="#2d2d2d", highlightthickness=0, cursor="hand2")
+        self.eye_canvas.pack(side="left", padx=(0, 6))
+        self.eye_circle = self.eye_canvas.create_oval(3, 3, 15, 15, fill="#382e18", outline="#665522", width=1.5)
+        
         self.idle_text = "what is your command?"
-        self.label = tk.Label(self.content_frame, text=self.idle_text, bg="#2d2d2d", fg="white", font=("Segoe UI", 11), padx=10, pady=5)
-        self.label.pack(pady=(5, 0))
+        self.label = tk.Label(
+            self.status_row,
+            text=self.idle_text,
+            bg="#2d2d2d",
+            fg="white",
+            font=("Segoe UI", 10),
+            cursor="hand2"
+        )
+        self.label.pack(side="left")
+        
+        # Click handler for Eye and Status Text to toggle recording
+        def on_click_trigger(event=None):
+            if self.on_trigger:
+                self.on_trigger()
+                
+        self.status_row.bind("<Button-1>", on_click_trigger)
+        self.eye_canvas.bind("<Button-1>", on_click_trigger)
+        self.label.bind("<Button-1>", on_click_trigger)
         
         # Checkbox controls container
         self.controls_frame = tk.Frame(self.content_frame, bg="#2d2d2d")
-        self.controls_frame.pack(pady=(0, 5))
+        self.controls_frame.pack(pady=(2, 4))
         
         # LLM norm checkbox
         self.llm_enabled = False
@@ -143,7 +169,7 @@ class WinVoiceUI:
         
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        width = 245
+        width = 250
         height = 65
         
         if position == "bottom-right":
@@ -166,6 +192,10 @@ class WinVoiceUI:
         
         self.reset_id = None
         self.check_queue()
+
+    def set_eye_color(self, fill, outline):
+        """Changes the glow color of Shockwave's eye."""
+        self.eye_canvas.itemconfig(self.eye_circle, fill=fill, outline=outline)
 
     def setup_taskbar_style(self):
         """Applies WS_EX_APPWINDOW to ensure permanent taskbar presence."""
@@ -192,6 +222,7 @@ class WinVoiceUI:
 
     def reset_to_idle(self):
         self.label.config(text=self.idle_text)
+        self.set_eye_color(fill="#382e18", outline="#665522")
         self.reset_id = None
 
     def check_queue(self):
@@ -204,12 +235,28 @@ class WinVoiceUI:
                     if self.reset_id:
                         self.root.after_cancel(self.reset_id)
                         self.reset_id = None
-                    self.label.config(text=msg.get("text", ""))
+                        
+                    txt = msg.get("text", "")
+                    self.label.config(text=txt)
+                    
+                    if txt == "record":
+                        # Glowing bright yellow Shockwave eye!
+                        self.set_eye_color(fill="#FFD700", outline="#FFF9C4")
+                    elif txt == "processing":
+                        # Amber processing
+                        self.set_eye_color(fill="#FF9800", outline="#FFE082")
+                    elif txt == "normalization":
+                        # Deep amber
+                        self.set_eye_color(fill="#FB8C00", outline="#FFCC80")
+                    else:
+                        self.set_eye_color(fill="#382e18", outline="#665522")
                     
                 elif cmd == "show_ready":
                     if self.reset_id:
                         self.root.after_cancel(self.reset_id)
                     self.label.config(text="ready")
+                    # Emerald green ready glow
+                    self.set_eye_color(fill="#00E676", outline="#B9F6CA")
                     
                     # Play sound on ready
                     if self.alert_enabled:
