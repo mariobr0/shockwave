@@ -27,7 +27,8 @@ Double-click `Shockwave.exe`.
 1. On the first launch, the **Control Panel (Launcher)** will open in the console.
 2. The program will automatically download the necessary speech recognition neural network (Whisper or GigaAM) to your system cache. (Note: the first download may take some time and require up to 2-3 GB of free space).
 3. Select "Start Shockwave" from the menu.
-4. Press `F12` in any Windows application to start dictating.
+4. Wait for the black widget to appear on screen.
+5. Press `F12` to start speech recognition.
 
 ---
 
