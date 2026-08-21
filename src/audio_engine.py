@@ -32,23 +32,31 @@ class AudioEngine:
         if self.engine_type == "gigaam":
             try:
                 import onnx_asr
-                model_name = config.GIGAAM_MODEL_PATH if config.GIGAAM_MODEL_PATH else config.GIGAAM_MODEL
+                model_name = config.GIGAAM_MODEL
                 quant = config.GIGAAM_QUANTIZATION if config.GIGAAM_QUANTIZATION else None
+                gigaam_path = config.GIGAAM_MODEL_PATH if config.GIGAAM_MODEL_PATH else config.GIGAAM_DIR
+                
                 print(f"Loading GigaAM model: {model_name} (quantization={quant}) ...")
-                self.model = onnx_asr.load_model(model_name, quantization=quant)
+                if os.path.exists(gigaam_path) and os.listdir(gigaam_path):
+                    print(f"Loading from local path: {gigaam_path}")
+                    self.model = onnx_asr.load_model(model_name, path=gigaam_path, quantization=quant)
+                else:
+                    self.model = onnx_asr.load_model(model_name, quantization=quant)
+                print("GigaAM model loaded successfully.")
             except Exception as e:
                 print(f"Error loading GigaAM: {e}")
         else:
             try:
-                from faster_whisper import download_model, WhisperModel
-                model_name = config.WHISPER_MODEL_PATH if config.WHISPER_MODEL_PATH else config.WHISPER_MODEL
-                print(f"Loading Whisper model: {model_name} ...")
-                hub_cache = os.environ.get("HF_HUB_CACHE")
-                try:
-                    model_path = download_model(model_name, local_files_only=True, cache_dir=hub_cache)
-                except Exception:
-                    model_path = download_model(model_name, cache_dir=hub_cache)
-                self.model = WhisperModel(model_path, device="cpu", compute_type="int8")
+                from faster_whisper import WhisperModel
+                whisper_path = config.WHISPER_MODEL_PATH if config.WHISPER_MODEL_PATH else config.WHISPER_DIR
+                
+                if os.path.exists(whisper_path) and os.path.exists(os.path.join(whisper_path, "model.bin")):
+                    print(f"Loading Whisper model from local path: {whisper_path} ...")
+                    self.model = WhisperModel(whisper_path, device="cpu", compute_type="int8")
+                else:
+                    model_name = config.WHISPER_MODEL
+                    print(f"Loading Whisper model by name: {model_name} ...")
+                    self.model = WhisperModel(model_name, device="cpu", compute_type="int8", download_root=whisper_path)
                 print("Whisper model loaded successfully.")
             except Exception as e:
                 print(f"Error loading Whisper: {e}")
@@ -58,9 +66,8 @@ class AudioEngine:
     def _audio_callback(self, indata, frames, time_info, status):
         """Called by sounddevice for each audio block."""
         if status:
-            pass # ignore warnings
+            pass
         if self.is_recording:
-            # indata is shape (frames, channels) -> (frames, 1)
             self.audio_data.append(indata.copy())
 
     def start_recording(self):
