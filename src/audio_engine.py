@@ -42,8 +42,9 @@ class AudioEngine:
             try:
                 from faster_whisper import WhisperModel
                 model_name = config.WHISPER_MODEL_PATH if config.WHISPER_MODEL_PATH else config.WHISPER_MODEL
-                print(f"Loading Faster-Whisper model: {model_name} ...")
-                self.model = WhisperModel(model_name, device="cpu", compute_type="int8")
+                print(f"Loading Whisper model: {model_name} ...")
+                self.model = WhisperModel(model_name, device="cpu", compute_type="int8", download_root=os.environ.get("HF_HUB_CACHE"))
+                print("Whisper model loaded successfully.")
             except Exception as e:
                 print(f"Error loading Whisper: {e}")
                 

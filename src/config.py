@@ -1,9 +1,24 @@
 import os
+import sys
 from dotenv import load_dotenv
 
 # Загружаем .env из текущей директории или из родительской (корня проекта)
 env_path = ".env" if os.path.exists(".env") else os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
 load_dotenv(env_path)
+
+# Путь к локальной папке models в корне проекта
+if getattr(sys, 'frozen', False):
+    exe_dir = os.path.dirname(sys.executable)
+    if os.path.exists(os.path.join(exe_dir, "models")):
+        MODELS_DIR = os.path.join(exe_dir, "models")
+    else:
+        MODELS_DIR = os.path.abspath(os.path.join(exe_dir, "..", "models"))
+else:
+    MODELS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "models"))
+
+os.makedirs(MODELS_DIR, exist_ok=True)
+os.environ["HF_HOME"] = MODELS_DIR
+os.environ["HF_HUB_CACHE"] = os.path.join(MODELS_DIR, "hub")
 
 STT_ENGINE = os.getenv("STT_ENGINE", "whisper")
 WHISPER_MODEL = os.getenv("WHISPER_MODEL", "large-v3-turbo")

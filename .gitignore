@@ -11,3 +11,4 @@ build/
 *.psd
 *.exe
 *.lnk
+models/

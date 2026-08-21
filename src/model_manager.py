@@ -5,11 +5,11 @@ import sys
 os.environ["HF_HUB_DISABLE_IMPLICIT_TOKEN"] = "1"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
+import config
+
 from huggingface_hub import constants
 from faster_whisper import download_model
 from dotenv import set_key, load_dotenv
-
-import config
 
 def get_env_path():
     cwd_env = os.path.abspath(".env")
@@ -48,12 +48,12 @@ def check_and_prompt(auto_start=True):
     
     if engine == "whisper" and not config.WHISPER_MODEL_PATH:
         try:
-            download_model(whisper_model, local_files_only=True)
+            download_model(whisper_model, local_files_only=True, download_root=os.environ.get("HF_HUB_CACHE"))
         except Exception:
             needs_download = True
             
     if engine == "gigaam" and not config.GIGAAM_MODEL_PATH:
-        cache_dir = os.path.join(constants.HF_HUB_CACHE, "models--istupakov--gigaam-v3-onnx")
+        cache_dir = os.path.join(os.environ.get("HF_HUB_CACHE", constants.HF_HUB_CACHE), "models--istupakov--gigaam-v3-onnx")
         if not os.path.exists(cache_dir):
             needs_download = True
 
@@ -66,7 +66,7 @@ def check_and_prompt(auto_start=True):
     print("  ОБНАРУЖЕНО ОТСУТСТВИЕ МОДЕЛИ РАСПОЗНАВАНИЯ РЕЧИ")
     print("="*65)
     print(f"Выбранный движок [{engine.upper()}] не найден локально.")
-    print(f"Все загрузки будут сохранены в: \n{constants.HF_HUB_CACHE}")
+    print(f"Все загрузки будут сохранены в папку проекта: \n{config.MODELS_DIR}")
     print("-"*65)
     print("Какую модель вы хотите скачать сейчас?")
     print(f"  1. Только Whisper ({whisper_model}) [~800 МБ] - Для IT терминов")
@@ -103,15 +103,15 @@ def check_and_prompt(auto_start=True):
             quant_choice = "int8"
             
     if choice in ["1", "3"]:
-        print(f"\n📥 Загрузка Whisper ({whisper_model})...")
-        download_model(whisper_model)
+        print(f"\n📥 Загрузка Whisper ({whisper_model}) в {config.MODELS_DIR}...")
+        download_model(whisper_model, download_root=os.environ.get("HF_HUB_CACHE"))
         if choice == "1" and engine != "whisper":
             update_env("STT_ENGINE", "whisper")
             print("Настройка в .env автоматически изменена на STT_ENGINE=whisper")
             
     if choice in ["2", "3"]:
         q_text = quant_choice if quant_choice else "None"
-        print(f"\n📥 Загрузка GigaAM ({gigaam_model}, quantization={q_text})...")
+        print(f"\n📥 Загрузка GigaAM ({gigaam_model}, quantization={q_text}) в {config.MODELS_DIR}...")
         import onnx_asr
         onnx_asr.load_model(gigaam_model, quantization=quant_choice if quant_choice else None)
         
@@ -121,4 +121,4 @@ def check_and_prompt(auto_start=True):
             
         update_env("GIGAAM_QUANTIZATION", quant_choice)
 
-    print("\n✅ Все необходимые модели успешно скачаны!\n")
+    print("\n✅ Все необходимые модели успешно скачаны в папку models/!\n")
