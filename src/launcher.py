@@ -40,6 +40,7 @@ def ensure_env_exists():
         with open(env_path, "w", encoding="utf-8") as f:
             f.write("STT_ENGINE=gigaam\n")
             f.write("WHISPER_MODEL=large-v3-turbo\n")
+            f.write("WHISPER_LANGUAGE=ru\n")
             f.write("GIGAAM_MODEL=gigaam-v3-e2e-rnnt\n")
             f.write("GIGAAM_QUANTIZATION=int8\n")
             f.write("APP_LANGUAGE=en\n")

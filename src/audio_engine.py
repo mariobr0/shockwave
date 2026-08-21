@@ -114,9 +114,17 @@ class AudioEngine:
                 
             else:
                 # faster-whisper processing
-                segments, info = self.model.transcribe(audio_np, language="ru")
+                whisper_lang = os.getenv("WHISPER_LANGUAGE", config.WHISPER_LANGUAGE)
+                if whisper_lang:
+                    whisper_lang = whisper_lang.strip().lower()
+                    if whisper_lang in ["auto", "none", ""]:
+                        whisper_lang = None
+                else:
+                    whisper_lang = None
+                    
+                segments, info = self.model.transcribe(audio_np, language=whisper_lang)
                 text = " ".join([segment.text for segment in segments])
-                print(f"Whisper output: {text}")
+                print(f"Whisper output ({whisper_lang if whisper_lang else 'auto'}): {text}")
                 return text.strip()
                 
         except Exception as e:

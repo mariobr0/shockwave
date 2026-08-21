@@ -48,6 +48,7 @@
 
 ### 4. Advanced Configuration via `.env` (Optional)
 You can customize additional parameters in `.env` (template provided in `.env.example`):
+* `WHISPER_LANGUAGE=ru` — Whisper recognition language (`ru`, `auto` for auto-detecting 99 languages, `en`, `de`, etc.).
 * `HOTKEY=f12` — recording hotkey (e.g. `f9`, `ctrl+space`, `alt+v`).
 * `UI_POSITION=bottom-left` — floating widget screen position (`bottom-left`, `bottom-right`, `top-center`).
 
