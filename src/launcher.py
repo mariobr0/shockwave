@@ -16,12 +16,10 @@ def get_env_path():
         
     # 2. Если запущен скомпилированный EXE (в dist/)
     if getattr(sys, 'frozen', False):
-        # Проверяем рядом с EXE
         exe_dir = os.path.dirname(sys.executable)
         exe_env = os.path.join(exe_dir, ".env")
         if os.path.exists(exe_env):
             return exe_env
-        # Проверяем в родительской папке (корень проекта)
         parent_env = os.path.abspath(os.path.join(exe_dir, "..", ".env"))
         if os.path.exists(parent_env):
             return parent_env
@@ -71,18 +69,33 @@ def menu():
     ensure_env_exists()
     while True:
         clear_screen()
-        engine = read_env("STT_ENGINE", "gigaam").upper()
-        llm_key = read_env("LLM_API_KEY", "")
-        key_display = "Установлен" if llm_key else "НЕ УСТАНОВЛЕН"
+        engine = read_env("STT_ENGINE", "gigaam").lower()
+        if engine == "whisper":
+            whisper_m = read_env("WHISPER_MODEL", "large-v3-turbo")
+            stt_display = f"Whisper ({whisper_m})"
+        else:
+            gigaam_m = read_env("GIGAAM_MODEL", "gigaam-v3-e2e-rnnt")
+            quant = read_env("GIGAAM_QUANTIZATION", "int8")
+            q_suffix = f", {quant}" if quant else ""
+            stt_display = f"GigaAM ({gigaam_m}{q_suffix})"
+
         llm_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
+        llm_key = read_env("LLM_API_KEY", "")
+        if llm_key:
+            if len(llm_key) > 10:
+                key_display = f"{llm_key[:7]}...{llm_key[-4:]}"
+            else:
+                key_display = f"{llm_key[:4]}..."
+        else:
+            key_display = "НЕ УСТАНОВЛЕН"
         
         print("================================================")
         print("          SHOCKWAVE - ПАНЕЛЬ УПРАВЛЕНИЯ         ")
         print("================================================")
         print("Текущие настройки:")
-        print(f"- STT Движок: [{engine}]")
-        print(f"- LLM Модель: [{llm_model}]")
-        print(f"- Ключ LLM:   [{key_display}]")
+        print(f"- STT Движок: {stt_display}")
+        print(f"- LLM Модель: {llm_model}")
+        print(f"- Ключ LLM:   {key_display}")
         print("================================================")
         print("1. Запустить Shockwave (Старт)")
         print("2. Настроить API-ключ и LLM")
@@ -102,7 +115,7 @@ def menu():
             import config
             config.STT_ENGINE = read_env("STT_ENGINE", "gigaam")
             
-            print(f"\nЗапуск Shockwave с движком [{config.STT_ENGINE}]...")
+            print(f"\nЗапуск Shockwave ({stt_display})...")
             import main
             app = main.WinVoiceApp()
             app.run()
@@ -123,7 +136,8 @@ def setup_llm():
     clear_screen()
     print("--- Настройка LLM ---")
     current_key = read_env("LLM_API_KEY", "")
-    print(f"Текущий ключ: {'Установлен' if current_key else 'Отсутствует'}")
+    key_info = f"{current_key[:7]}...{current_key[-4:]}" if len(current_key) > 10 else ("Установлен" if current_key else "Отсутствует")
+    print(f"Текущий ключ: {key_info}")
     new_key = input("Введите новый API-ключ (или Enter, чтобы оставить без изменений): ").strip()
     if new_key:
         update_env("LLM_API_KEY", new_key)
@@ -141,16 +155,18 @@ def setup_llm():
 def setup_stt():
     clear_screen()
     print("--- Выбор движка распознавания (STT) ---")
-    print("1. Whisper (Отлично для смешанной речи и IT-терминов)")
-    print("2. GigaAM (Очень быстро для чистой русской речи)")
+    whisper_m = read_env("WHISPER_MODEL", "large-v3-turbo")
+    gigaam_m = read_env("GIGAAM_MODEL", "gigaam-v3-e2e-rnnt")
+    print(f"1. Whisper ({whisper_m}) — отлично для смешанной речи и IT-терминов")
+    print(f"2. GigaAM ({gigaam_m}) — очень быстро для чистой русской речи")
     
     choice = input("\nВыберите движок (1-2): ").strip()
     if choice == "1":
         update_env("STT_ENGINE", "whisper")
-        print("Установлен движок: Whisper")
+        print(f"Установлен движок: Whisper ({whisper_m})")
     elif choice == "2":
         update_env("STT_ENGINE", "gigaam")
-        print("Установлен движок: GigaAM")
+        print(f"Установлен движок: GigaAM ({gigaam_m})")
         
     input("\nНажмите Enter для возврата...")
 
