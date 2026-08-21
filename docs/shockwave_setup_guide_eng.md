@@ -36,6 +36,13 @@
    * **Option 4 (`Download / Verify STT Models`):** Download the selected model weights into the local `models/` directory.
    * **Option 5 (`Сменить язык на русский`):** Toggle interface language if needed.
 
+**Manual Configuration via `.env.example` (Optional):**  
+You can also configure all settings manually. Simply copy or rename the template `.env.example` to `.env`:
+```bat
+copy .env.example .env
+```
+and edit the parameters (e.g. change the global hotkey `HOTKEY=f12`, widget position, or local LLM endpoints) in any text editor.
+
 ---
 
 ### 4. Usage
