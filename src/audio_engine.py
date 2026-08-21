@@ -40,10 +40,15 @@ class AudioEngine:
                 print(f"Error loading GigaAM: {e}")
         else:
             try:
-                from faster_whisper import WhisperModel
+                from faster_whisper import download_model, WhisperModel
                 model_name = config.WHISPER_MODEL_PATH if config.WHISPER_MODEL_PATH else config.WHISPER_MODEL
                 print(f"Loading Whisper model: {model_name} ...")
-                self.model = WhisperModel(model_name, device="cpu", compute_type="int8", download_root=os.environ.get("HF_HUB_CACHE"))
+                hub_cache = os.environ.get("HF_HUB_CACHE")
+                try:
+                    model_path = download_model(model_name, local_files_only=True, cache_dir=hub_cache)
+                except Exception:
+                    model_path = download_model(model_name, cache_dir=hub_cache)
+                self.model = WhisperModel(model_path, device="cpu", compute_type="int8")
                 print("Whisper model loaded successfully.")
             except Exception as e:
                 print(f"Error loading Whisper: {e}")

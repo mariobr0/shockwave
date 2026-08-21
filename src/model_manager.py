@@ -43,17 +43,18 @@ def check_and_prompt(auto_start=True):
     whisper_model = os.getenv("WHISPER_MODEL", config.WHISPER_MODEL)
     gigaam_model = os.getenv("GIGAAM_MODEL", config.GIGAAM_MODEL)
     engine = (os.getenv("STT_ENGINE") or config.STT_ENGINE).lower()
+    hub_cache = os.environ.get("HF_HUB_CACHE", constants.HF_HUB_CACHE)
     
     needs_download = False
     
     if engine == "whisper" and not config.WHISPER_MODEL_PATH:
         try:
-            download_model(whisper_model, local_files_only=True, download_root=os.environ.get("HF_HUB_CACHE"))
+            download_model(whisper_model, local_files_only=True, cache_dir=hub_cache)
         except Exception:
             needs_download = True
             
     if engine == "gigaam" and not config.GIGAAM_MODEL_PATH:
-        cache_dir = os.path.join(os.environ.get("HF_HUB_CACHE", constants.HF_HUB_CACHE), "models--istupakov--gigaam-v3-onnx")
+        cache_dir = os.path.join(hub_cache, "models--istupakov--gigaam-v3-onnx")
         if not os.path.exists(cache_dir):
             needs_download = True
 
@@ -104,7 +105,7 @@ def check_and_prompt(auto_start=True):
             
     if choice in ["1", "3"]:
         print(f"\n📥 Загрузка Whisper ({whisper_model}) в {config.MODELS_DIR}...")
-        download_model(whisper_model, download_root=os.environ.get("HF_HUB_CACHE"))
+        download_model(whisper_model, cache_dir=hub_cache)
         if choice == "1" and engine != "whisper":
             update_env("STT_ENGINE", "whisper")
             print("Настройка в .env автоматически изменена на STT_ENGINE=whisper")
