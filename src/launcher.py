@@ -85,10 +85,12 @@ def menu():
         llm_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
         llm_key = read_env("LLM_API_KEY", "")
         
+        version = getattr(config, "APP_VERSION", "0.9.0")
+        
         if lang == "ru":
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "НЕ УСТАНОВЛЕН")
             print("================================================")
-            print("          SHOCKWAVE - ПАНЕЛЬ УПРАВЛЕНИЯ         ")
+            print(f"       SHOCKWAVE v{version} - ПАНЕЛЬ УПРАВЛЕНИЯ     ")
             print("================================================")
             print("Текущие настройки:")
             print(f"- STT Движок: {stt_display}")
@@ -106,7 +108,7 @@ def menu():
         else:
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "NOT SET")
             print("================================================")
-            print("          SHOCKWAVE - CONTROL PANEL             ")
+            print(f"        SHOCKWAVE v{version} - CONTROL PANEL        ")
             print("================================================")
             print("Current Settings:")
             print(f"- STT Engine: {stt_display}")

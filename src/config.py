@@ -27,6 +27,7 @@ GIGAAM_MODEL = os.getenv("GIGAAM_MODEL", "gigaam-v3-e2e-rnnt")
 GIGAAM_MODEL_PATH = os.getenv("GIGAAM_MODEL_PATH", "")
 GIGAAM_QUANTIZATION = os.getenv("GIGAAM_QUANTIZATION", "")
 APP_LANGUAGE = os.getenv("APP_LANGUAGE", "en")
+APP_VERSION = "0.9.0"
 
 LLM_ENDPOINT = os.getenv("LLM_ENDPOINT", "http://127.0.0.1:8045/v1/chat/completions")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")
