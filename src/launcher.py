@@ -47,7 +47,7 @@ def ensure_env_exists():
             f.write("LLM_ENDPOINT=\n")
             f.write("LLM_API_KEY=\n")
             f.write("LLM_MODEL=gemini-2.5-flash-lite\n")
-            f.write("HOTKEY=f12\n")
+            f.write("HOTKEY=ctrl+space\n")
             f.write("UI_POSITION=bottom-left\n")
 
 def read_env(key, default=""):

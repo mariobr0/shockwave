@@ -39,7 +39,7 @@ LLM_ENDPOINT = os.getenv("LLM_ENDPOINT", "")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")
 LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash-lite")
 
-HOTKEY = os.getenv("HOTKEY", "f12")
+HOTKEY = os.getenv("HOTKEY", "ctrl+space")
 UI_POSITION = os.getenv("UI_POSITION", "bottom-left")
 
 AUDIO_TEMP_FILE = "temp_audio.wav"

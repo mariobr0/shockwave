@@ -48,19 +48,23 @@
 
 ### 4. Advanced Configuration via `.env` (Optional)
 You can customize additional parameters in `.env` (template provided in `.env.example`):
-* `HOTKEY=f12` — system global hotkey (e.g. `f9`, `ctrl+space`, `alt+v`).
+* `HOTKEY=ctrl+space` — system global hotkey (works natively via Windows kernel).
 * `WHISPER_LANGUAGE=ru` — Whisper recognition language (`ru`, `auto` for auto-detecting 99 languages, `en`, `de`, etc.).
 * `UI_POSITION=bottom-left` — floating widget screen position (`bottom-left`, `bottom-right`, `top-center`).
+
+#### Recommended Hotkeys:
+* ✅ **Recommended:** `ctrl+space`, `alt+space`, `f9`, `f8`, `f10`, `pause`, `ctrl+shift+space`.
+* ⚠️ **Not recommended:** `f12` (reserved by Windows Kernel Debugger), `f11` (browser fullscreen), `f5` (page reload).
 
 ---
 
 ### 5. Usage
 1. In the menu, select **`1. Start Shockwave`** — a floating widget will appear on screen.
 2. To start dictating:
-   * Press system hotkey **`F12`** in any Windows application, **OR**
+   * Press system hotkey **`Ctrl + Space`** in any Windows application, **OR**
    * Click the **Shockwave Eye** button on the floating widget.
 3. While recording, the eye will ignite in **vibrant yellow** 🟡.
-4. Press **`F12`** (or click the eye) again to finish recording.
+4. Press **`Ctrl + Space`** (or click the eye) again to finish recording.
 5. When the status displays **`ready`** (accompanied by an emerald glow and chime), the formatted text is already in your clipboard (`Ctrl + V`).
 
 ---

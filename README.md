@@ -16,7 +16,7 @@
 - **Gemini (`gemini-2.5-flash-lite`) / OpenAI Compatible**: Lightweight, fast AI model used for punctuation restoration, formatting, and technical term capitalization.
 
 ## Features
-* **Rock-Solid System Hotkey:** Uses native Win32 `RegisterHotKey` (Default `F12`). Never drops out after system sleep, lock screen, or long background sessions.
+* **Rock-Solid System Hotkey:** Native Win32 `RegisterHotKey` (Default `Ctrl + Space`). Never drops out after system sleep, lock screen, or long background sessions.
 * **Interactive Shockwave Eye:** Interactive glowing eye button on the widget that ignites in vibrant yellow (`#FFD700`) during recording. Click-to-record supported!
 * **Dual Speech-to-Text (STT):** Choose between Whisper (mixed IT speech) and GigaAM (ultra-fast Russian speech).
 * **Fully Portable & Compact Storage:** Flat directory structure saves weights locally in `models/` with zero bloat (only ~1.76 GB for both neural networks).
@@ -46,7 +46,7 @@ Detailed guides are available below:
 - **Gemini (`gemini-2.5-flash-lite`) / OpenAI-совместимый**: Быстрая языковая модель от Google для восстановления пунктуации, форматирования и исправления опечаток.
 
 ## Возможности
-* **Надёжная системная горячая клавиша:** Работает через ядро Windows (`RegisterHotKey`, по умолчанию `F12`). Никогда не отваливается после сна или блокировки экрана.
+* **Надёжная системная горячая клавиша:** Работает через ядро Windows (`RegisterHotKey`, по умолчанию `Ctrl + Space`). Никогда не отваливается после сна или блокировки экрана.
 * **Интерактивный «Глаз Shockwave»:** Светящийся глаз-кнопка на виджете, вспыхивающий ярко-жёлтым светом (`#FFD700`) во время записи. Поддерживает запуск диктовки кликом мыши!
 * **Два движка распознавания (STT):** Быстрый выбор между Whisper (для смешанной IT-речи) и GigaAM (очень быстрый для русской речи).
 * **Полная портативность и компактность:** Оптимизированная структура хранения моделей в `models/` без дубликатов (всего ~1.76 ГБ для двух моделей).
