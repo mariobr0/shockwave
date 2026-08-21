@@ -14,7 +14,7 @@ def ensure_env_exists():
             f.write("WHISPER_MODEL=large-v3-turbo\n")
             f.write("LLM_ENDPOINT=http://127.0.0.1:8045/v1/chat/completions\n")
             f.write("LLM_API_KEY=\n")
-            f.write("LLM_MODEL=gemini-3.1-flash-lite\n")
+            f.write("LLM_MODEL=gemini-2.5-flash-lite\n")
             f.write("HOTKEY=f12\n")
             f.write("UI_POSITION=bottom-left\n")
 
@@ -37,7 +37,7 @@ def menu():
         engine = read_env("STT_ENGINE", "whisper").upper()
         llm_key = read_env("LLM_API_KEY", "")
         key_display = "Set" if llm_key else "NOT SET"
-        llm_model = read_env("LLM_MODEL", "gemini-3.1-flash-lite")
+        llm_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
         
         print("================================================")
         print("1. Запустить Shockwave (Старт)")
@@ -82,7 +82,7 @@ def setup_llm():
         update_env("LLM_API_KEY", new_key)
         print("Ключ сохранен!")
         
-    current_model = read_env("LLM_MODEL", "gemini-3.1-flash-lite")
+    current_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
     print(f"\nТекущая модель: {current_model}")
     new_model = input("Введите название модели (или Enter, чтобы оставить без изменений): ").strip()
     if new_model:

@@ -11,7 +11,7 @@ GIGAAM_QUANTIZATION = os.getenv("GIGAAM_QUANTIZATION", "")
 
 LLM_ENDPOINT = os.getenv("LLM_ENDPOINT", "http://127.0.0.1:8045/v1/chat/completions")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")
-LLM_MODEL = os.getenv("LLM_MODEL", "gemini-3.1-flash-lite")
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash-lite")
 
 HOTKEY = os.getenv("HOTKEY", "f12")
 UI_POSITION = os.getenv("UI_POSITION", "bottom-left")
