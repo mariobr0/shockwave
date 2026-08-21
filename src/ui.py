@@ -93,13 +93,15 @@ class WinVoiceUI:
         )
         self.eye_canvas.place(relx=0.5, rely=0.5, anchor="center")
         
-        # Inactive state: Gray fill with thin yellow/gold outline
+        # Color palettes
         self.COLOR_INACTIVE_FILL = "#333333"
         self.COLOR_INACTIVE_OUTLINE = "#FFD700"
-        
-        # Active state: Solid vibrant yellow
+        self.COLOR_HOVER_FILL = "#505050"
+        self.COLOR_HOVER_OUTLINE = "#FFF59D"
         self.COLOR_ACTIVE_FILL = "#FFD700"
         self.COLOR_ACTIVE_OUTLINE = "#FFD700"
+        
+        self.is_eye_active = False
         
         self.eye_circle = self.eye_canvas.create_oval(
             2, 2, 30, 30,
@@ -113,8 +115,26 @@ class WinVoiceUI:
             if self.on_trigger:
                 self.on_trigger()
                 
+        # Hover handlers
+        def on_eye_enter(event=None):
+            if not self.is_eye_active:
+                self.eye_canvas.itemconfig(
+                    self.eye_circle,
+                    fill=self.COLOR_HOVER_FILL,
+                    outline=self.COLOR_HOVER_OUTLINE
+                )
+                
+        def on_eye_leave(event=None):
+            if not self.is_eye_active:
+                self.eye_canvas.itemconfig(
+                    self.eye_circle,
+                    fill=self.COLOR_INACTIVE_FILL,
+                    outline=self.COLOR_INACTIVE_OUTLINE
+                )
+                
         self.eye_canvas.bind("<Button-1>", on_eye_click)
-        self.eye_canvas.bind("<Enter>", lambda e: self.eye_canvas.config(cursor="hand2"))
+        self.eye_canvas.bind("<Enter>", on_eye_enter)
+        self.eye_canvas.bind("<Leave>", on_eye_leave)
         
         # --- 3. Right Content Column (Status Text + Controls) ---
         self.right_frame = tk.Frame(self.root, bg="#2d2d2d")
@@ -132,6 +152,8 @@ class WinVoiceUI:
         )
         self.label.pack(fill="x", pady=(2, 2))
         self.label.bind("<Button-1>", on_eye_click)
+        self.label.bind("<Enter>", on_eye_enter)
+        self.label.bind("<Leave>", on_eye_leave)
         
         # Checkbox controls container
         self.controls_frame = tk.Frame(self.right_frame, bg="#2d2d2d")
@@ -219,6 +241,7 @@ class WinVoiceUI:
 
     def set_eye_active(self, is_active):
         """Switches between solid yellow (active) and gray with yellow outline (inactive)."""
+        self.is_eye_active = is_active
         if is_active:
             self.eye_canvas.itemconfig(
                 self.eye_circle,
