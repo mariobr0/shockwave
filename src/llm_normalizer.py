@@ -1,4 +1,4 @@
-﻿import requests
+import requests
 import config
 
 class LLMNormalizer:
@@ -12,14 +12,16 @@ class LLMNormalizer:
         if config.LLM_API_KEY:
             headers["Authorization"] = f"Bearer {config.LLM_API_KEY}"
             
+        user_prompt = f"Текст для исправления и пунктуации (верни ТОЛЬКО исправленный текст):\n{text}"
+        
         payload = {
             "model": config.LLM_MODEL,
             "messages": [
                 {"role": "system", "content": config.STT_SYSTEM_PROMPT},
-                {"role": "user", "content": text}
+                {"role": "user", "content": user_prompt}
             ],
             "max_tokens": 1024,
-            "temperature": 0.3
+            "temperature": 0.1
         }
         
         try:
@@ -30,7 +32,7 @@ class LLMNormalizer:
             return normalized.strip() if normalized else text
         except requests.exceptions.RequestException as e:
             print(f"LLM API Error: {e}")
-            return text  # Fallback to raw whisper text
+            return text  # Fallback to raw text
         except Exception as e:
             print(f"Unknown LLM Error: {e}")
             return text
