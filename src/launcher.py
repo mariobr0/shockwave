@@ -40,6 +40,7 @@ def ensure_env_exists():
             f.write("WHISPER_MODEL=large-v3-turbo\n")
             f.write("GIGAAM_MODEL=gigaam-v3-e2e-rnnt\n")
             f.write("GIGAAM_QUANTIZATION=int8\n")
+            f.write("APP_LANGUAGE=en\n")
             f.write("LLM_ENDPOINT=http://127.0.0.1:8045/v1/chat/completions\n")
             f.write("LLM_API_KEY=\n")
             f.write("LLM_MODEL=gemini-2.5-flash-lite\n")
@@ -69,7 +70,9 @@ def menu():
     ensure_env_exists()
     while True:
         clear_screen()
+        lang = read_env("APP_LANGUAGE", "en").lower()
         engine = read_env("STT_ENGINE", "gigaam").lower()
+        
         if engine == "whisper":
             whisper_m = read_env("WHISPER_MODEL", "large-v3-turbo")
             stt_display = f"Whisper ({whisper_m})"
@@ -81,33 +84,52 @@ def menu():
 
         llm_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
         llm_key = read_env("LLM_API_KEY", "")
-        if llm_key:
-            if len(llm_key) > 10:
-                key_display = f"{llm_key[:7]}...{llm_key[-4:]}"
-            else:
-                key_display = f"{llm_key[:4]}..."
+        
+        if lang == "ru":
+            key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "НЕ УСТАНОВЛЕН")
+            print("================================================")
+            print("          SHOCKWAVE - ПАНЕЛЬ УПРАВЛЕНИЯ         ")
+            print("================================================")
+            print("Текущие настройки:")
+            print(f"- STT Движок: {stt_display}")
+            print(f"- LLM Модель: {llm_model}")
+            print(f"- Ключ LLM:   {key_display}")
+            print("================================================")
+            print("1. Запустить Shockwave")
+            print("2. Настроить API-ключ и LLM")
+            print("3. Выбрать движок распознавания (STT)")
+            print("4. Скачать/Проверить модели распознавания")
+            print("5. Change language to English")
+            print("6. Выход")
+            print("================================================")
+            prompt_text = "Ваш выбор (1-6): "
         else:
-            key_display = "NOT SET"
+            key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "NOT SET")
+            print("================================================")
+            print("          SHOCKWAVE - CONTROL PANEL             ")
+            print("================================================")
+            print("Current Settings:")
+            print(f"- STT Engine: {stt_display}")
+            print(f"- LLM Model:  {llm_model}")
+            print(f"- LLM Key:    {key_display}")
+            print("================================================")
+            print("1. Start Shockwave")
+            print("2. Configure API Key & LLM")
+            print("3. Select STT Engine")
+            print("4. Download / Verify STT Models")
+            print("5. Сменить язык на русский")
+            print("6. Exit")
+            print("================================================")
+            prompt_text = "Your choice (1-6): "
         
-        print("================================================")
-        print("          SHOCKWAVE - CONTROL PANEL             ")
-        print("================================================")
-        print("Current Settings:")
-        print(f"- STT Engine: {stt_display}")
-        print(f"- LLM Model:  {llm_model}")
-        print(f"- LLM Key:    {key_display}")
-        print("================================================")
-        print("1. Start Shockwave")
-        print("2. Configure API Key & LLM")
-        print("3. Select STT Engine")
-        print("4. Download / Verify STT Models")
-        print("5. Exit")
-        print("================================================")
-        
-        choice = input("Your choice (1-5): ").strip()
+        choice = input(prompt_text).strip()
         
         if choice == "1":
-            print("\nChecking models before start...")
+            if lang == "ru":
+                print("\nПроверка моделей перед запуском...")
+            else:
+                print("\nChecking models before start...")
+                
             import model_manager
             model_manager.check_and_prompt(auto_start=True)
             
@@ -115,58 +137,96 @@ def menu():
             import config
             config.STT_ENGINE = read_env("STT_ENGINE", "gigaam")
             
-            print(f"\nStarting Shockwave ({stt_display})...")
+            if lang == "ru":
+                print(f"\nЗапуск Shockwave ({stt_display})...")
+            else:
+                print(f"\nStarting Shockwave ({stt_display})...")
+                
             import main
             app = main.WinVoiceApp()
             app.run()
             sys.exit(0)
             
         elif choice == "2":
-            setup_llm()
+            setup_llm(lang)
         elif choice == "3":
-            setup_stt()
+            setup_stt(lang)
         elif choice == "4":
             import model_manager
             model_manager.check_and_prompt(auto_start=False)
-            input("\nPress Enter to return to menu...")
+            if lang == "ru":
+                input("\nНажмите Enter, чтобы вернуться в меню...")
+            else:
+                input("\nPress Enter to return to menu...")
         elif choice == "5":
+            new_lang = "ru" if lang == "en" else "en"
+            update_env("APP_LANGUAGE", new_lang)
+        elif choice == "6":
             sys.exit(0)
 
-def setup_llm():
-    print("\n--- LLM Settings ---")
+def setup_llm(lang="en"):
     current_key = read_env("LLM_API_KEY", "")
-    key_info = f"{current_key[:7]}...{current_key[-4:]}" if len(current_key) > 10 else ("Set" if current_key else "Not Set")
-    print(f"Current API Key: {key_info}")
-    new_key = input("Enter new API Key (or press Enter to keep current): ").strip()
-    if new_key:
-        update_env("LLM_API_KEY", new_key)
-        print("API Key saved!")
-        
     current_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
-    print(f"Current LLM Model: {current_model}")
-    new_model = input("Enter model name (or press Enter to keep current): ").strip()
-    if new_model:
-        update_env("LLM_MODEL", new_model)
-        print("Model saved!")
     
-    input("\nPress Enter to return...")
+    if lang == "ru":
+        print("\n--- Настройка LLM ---")
+        key_info = f"{current_key[:7]}...{current_key[-4:]}" if len(current_key) > 10 else ("Установлен" if current_key else "Отсутствует")
+        print(f"Текущий ключ: {key_info}")
+        new_key = input("Введите новый API-ключ (или Enter, чтобы оставить без изменений): ").strip()
+        if new_key:
+            update_env("LLM_API_KEY", new_key)
+            print("Ключ сохранен!")
+            
+        print(f"Текущая модель: {current_model}")
+        new_model = input("Введите название модели (или Enter, чтобы оставить без изменений): ").strip()
+        if new_model:
+            update_env("LLM_MODEL", new_model)
+            print("Модель сохранена!")
+        input("\nНажмите Enter для возврата...")
+    else:
+        print("\n--- LLM Settings ---")
+        key_info = f"{current_key[:7]}...{current_key[-4:]}" if len(current_key) > 10 else ("Set" if current_key else "Not Set")
+        print(f"Current API Key: {key_info}")
+        new_key = input("Enter new API Key (or press Enter to keep current): ").strip()
+        if new_key:
+            update_env("LLM_API_KEY", new_key)
+            print("API Key saved!")
+            
+        print(f"Current LLM Model: {current_model}")
+        new_model = input("Enter model name (or press Enter to keep current): ").strip()
+        if new_model:
+            update_env("LLM_MODEL", new_model)
+            print("Model saved!")
+        input("\nPress Enter to return...")
 
-def setup_stt():
-    print("\n--- Select STT Engine ---")
+def setup_stt(lang="en"):
     whisper_m = read_env("WHISPER_MODEL", "large-v3-turbo")
     gigaam_m = read_env("GIGAAM_MODEL", "gigaam-v3-e2e-rnnt")
-    print(f"1. Whisper ({whisper_m}) — great for mixed speech & IT terms")
-    print(f"2. GigaAM ({gigaam_m}) — ultra-fast for Russian speech")
     
-    choice = input("\nSelect engine (1-2): ").strip()
-    if choice == "1":
-        update_env("STT_ENGINE", "whisper")
-        print(f"Selected engine: Whisper ({whisper_m})")
-    elif choice == "2":
-        update_env("STT_ENGINE", "gigaam")
-        print(f"Selected engine: GigaAM ({gigaam_m})")
-        
-    input("\nPress Enter to return...")
+    if lang == "ru":
+        print("\n--- Выбор движка распознавания (STT) ---")
+        print(f"1. Whisper ({whisper_m}) — отлично для смешанной речи и IT-терминов")
+        print(f"2. GigaAM ({gigaam_m}) — очень быстро для русской речи")
+        choice = input("\nВыберите движок (1-2): ").strip()
+        if choice == "1":
+            update_env("STT_ENGINE", "whisper")
+            print(f"Установлен движок: Whisper ({whisper_m})")
+        elif choice == "2":
+            update_env("STT_ENGINE", "gigaam")
+            print(f"Установлен движок: GigaAM ({gigaam_m})")
+        input("\nНажмите Enter для возврата...")
+    else:
+        print("\n--- Select STT Engine ---")
+        print(f"1. Whisper ({whisper_m}) — great for mixed speech & IT terms")
+        print(f"2. GigaAM ({gigaam_m}) — ultra-fast for Russian speech")
+        choice = input("\nSelect engine (1-2): ").strip()
+        if choice == "1":
+            update_env("STT_ENGINE", "whisper")
+            print(f"Selected engine: Whisper ({whisper_m})")
+        elif choice == "2":
+            update_env("STT_ENGINE", "gigaam")
+            print(f"Selected engine: GigaAM ({gigaam_m})")
+        input("\nPress Enter to return...")
 
 if __name__ == "__main__":
     menu()

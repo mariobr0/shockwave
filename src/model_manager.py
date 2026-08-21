@@ -43,6 +43,7 @@ def check_and_prompt(auto_start=True):
     whisper_model = os.getenv("WHISPER_MODEL", config.WHISPER_MODEL)
     gigaam_model = os.getenv("GIGAAM_MODEL", config.GIGAAM_MODEL)
     engine = (os.getenv("STT_ENGINE") or config.STT_ENGINE).lower()
+    lang = os.getenv("APP_LANGUAGE", config.APP_LANGUAGE).lower()
     hub_cache = os.environ.get("HF_HUB_CACHE", constants.HF_HUB_CACHE)
     
     needs_download = False
@@ -60,31 +61,50 @@ def check_and_prompt(auto_start=True):
 
     if not needs_download:
         if not auto_start:
-            print("\n[OK] Selected model is already downloaded locally and ready to use!")
+            if lang == "ru":
+                print("\n✅ Выбранная модель уже загружена локально и готова к работе!")
+            else:
+                print("\n[OK] Selected model is already downloaded locally and ready to use!")
         return
         
-    print("\n" + "="*65)
-    print("           SPEECH RECOGNITION MODEL NOT FOUND")
-    print("="*65)
-    print(f"Selected engine [{engine.upper()}] is not found locally.")
-    print(f"All downloads will be stored in project folder: \n{config.MODELS_DIR}")
-    print("-"*65)
-    print("Which model would you like to download now?")
-    print(f"  1. Only Whisper ({whisper_model}) [~800 MB] - Best for mixed/IT speech")
-    print(f"  2. Only GigaAM (gigaam-v3-onnx)  - Fast Russian speech")
-    print("  3. Download both models")
-    print("  4. Cancel")
-    print("="*65)
+    if lang == "ru":
+        print("\n" + "="*65)
+        print("         ОБНАРУЖЕНО ОТСУТСТВИЕ МОДЕЛИ РАСПОЗНАВАНИЯ")
+        print("="*65)
+        print(f"Выбранный движок [{engine.upper()}] не найден локально.")
+        print(f"Все загрузки будут сохранены в папку проекта: \n{config.MODELS_DIR}")
+        print("-"*65)
+        print("Какую модель вы хотите скачать сейчас?")
+        print(f"  1. Только Whisper ({whisper_model}) [~800 МБ] - Для IT-терминов")
+        print(f"  2. Только GigaAM (gigaam-v3-onnx)  - Быстрый русский")
+        print("  3. Скачать обе модели")
+        print("  4. Отмена")
+        print("="*65)
+        prompt_choice = "Ваш выбор (1-4): "
+    else:
+        print("\n" + "="*65)
+        print("           SPEECH RECOGNITION MODEL NOT FOUND")
+        print("="*65)
+        print(f"Selected engine [{engine.upper()}] is not found locally.")
+        print(f"All downloads will be stored in project folder: \n{config.MODELS_DIR}")
+        print("-"*65)
+        print("Which model would you like to download now?")
+        print(f"  1. Only Whisper ({whisper_model}) [~800 MB] - Best for mixed/IT speech")
+        print(f"  2. Only GigaAM (gigaam-v3-onnx)  - Fast Russian speech")
+        print("  3. Download both models")
+        print("  4. Cancel")
+        print("="*65)
+        prompt_choice = "Your choice (1-4): "
     
     while True:
-        choice = input("Your choice (1-4): ").strip()
+        choice = input(prompt_choice).strip()
         if choice in ["1", "2", "3", "4"]:
             break
-        print("Please enter a number from 1 to 4.")
+        print("Please enter a number from 1 to 4." if lang != "ru" else "Пожалуйста, введите число от 1 до 4.")
         
     if choice == "4":
         if auto_start:
-            print("Exiting application...")
+            print("Exiting application..." if lang != "ru" else "Выход из программы...")
             sys.exit(0)
         else:
             return
@@ -92,34 +112,42 @@ def check_and_prompt(auto_start=True):
     quant_choice = ""
     if choice in ["2", "3"]:
         print("\n" + "-"*65)
-        print("Which quantization quality for GigaAM would you prefer?")
-        print("  1. Compressed (INT8) ~ 216 MB (Ultra-fast, Recommended)")
-        print("  2. Full (Float32) ~ 885 MB (Max precision)")
+        if lang == "ru":
+            print("Какое качество для GigaAM вы хотите использовать?")
+            print("  1. Сжатая (INT8) ~ 216 МБ (Очень быстрая, рекомендуется)")
+            print("  2. Полная (Float32) ~ 885 МБ (Максимальная точность)")
+        else:
+            print("Which quantization quality for GigaAM would you prefer?")
+            print("  1. Compressed (INT8) ~ 216 MB (Ultra-fast, Recommended)")
+            print("  2. Full (Float32) ~ 885 MB (Max precision)")
+            
         while True:
-            q_ans = input("Your choice (1-2): ").strip()
+            q_ans = input("Your choice (1-2): " if lang != "ru" else "Ваш выбор (1-2): ").strip()
             if q_ans in ["1", "2"]:
                 break
-            print("Enter 1 or 2.")
+            print("Enter 1 or 2." if lang != "ru" else "Введите 1 или 2.")
         if q_ans == "1":
             quant_choice = "int8"
             
     if choice in ["1", "3"]:
-        print(f"\nDownloading Whisper ({whisper_model}) into {config.MODELS_DIR}...")
+        msg = f"\nDownloading Whisper ({whisper_model}) into {config.MODELS_DIR}..." if lang != "ru" else f"\n📥 Загрузка Whisper ({whisper_model}) в {config.MODELS_DIR}..."
+        print(msg)
         download_model(whisper_model, cache_dir=hub_cache)
         if choice == "1" and engine != "whisper":
             update_env("STT_ENGINE", "whisper")
-            print("Config updated to STT_ENGINE=whisper")
+            print("Config updated to STT_ENGINE=whisper" if lang != "ru" else "Настройка обновлена: STT_ENGINE=whisper")
             
     if choice in ["2", "3"]:
         q_text = quant_choice if quant_choice else "None"
-        print(f"\nDownloading GigaAM ({gigaam_model}, quantization={q_text}) into {config.MODELS_DIR}...")
+        msg = f"\nDownloading GigaAM ({gigaam_model}, quantization={q_text}) into {config.MODELS_DIR}..." if lang != "ru" else f"\n📥 Загрузка GigaAM ({gigaam_model}, quantization={q_text}) в {config.MODELS_DIR}..."
+        print(msg)
         import onnx_asr
         onnx_asr.load_model(gigaam_model, quantization=quant_choice if quant_choice else None)
         
         if choice == "2" and engine != "gigaam":
             update_env("STT_ENGINE", "gigaam")
-            print("Config updated to STT_ENGINE=gigaam")
+            print("Config updated to STT_ENGINE=gigaam" if lang != "ru" else "Настройка обновлена: STT_ENGINE=gigaam")
             
         update_env("GIGAAM_QUANTIZATION", quant_choice)
 
-    print("\n[OK] All requested models downloaded successfully into models/!\n")
+    print("\n[OK] All requested models downloaded successfully into models/!\n" if lang != "ru" else "\n✅ Все необходимые модели успешно скачаны в папку models/!\n")
