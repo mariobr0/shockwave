@@ -1,6 +1,6 @@
 # Shockwave
 
-![Shockwave](shockwave.jpg)
+![Shockwave](docs/shockwave.jpg)
 
 *(Scroll down for Russian version / Прокрутите вниз, чтобы прочесть версию на русском языке)*
 
@@ -17,13 +17,13 @@
 * **Global Hotkey:** Default `F12`. Works in any application.
 * **Dual Speech-to-Text (STT):** Uses `faster-whisper` (for mixed English/Russian) or `GigaAM` (for ultra-fast Russian dictation). Both run locally and download automatically.
 * **Normalization:** An LLM (e.g., Gemini or a local model) fixes typos, adds punctuation, and formats IT terms.
-* **Interactive UI:** A floating widget with a checkbox to toggle AI correction on the fly.
+* **Interactive UI:** A floating widget with checkboxes to toggle AI correction and sound alerts on the fly.
 * **Backup Log:** The console saves transcription history, preventing data loss.
 
 ## Documentation & Installation
 Detailed instructions are available in the setup guides:
 
-🇬🇧 **[Setup Guide (English)](shockwave_setup_guide_eng.md)**
+🇬🇧 **[Setup Guide (English)](docs/shockwave_setup_guide_eng.md)**
 
 ---
 
@@ -42,13 +42,13 @@ Detailed instructions are available in the setup guides:
 * **Глобальная кнопка:** По умолчанию `F12`. Работает в любом приложении.
 * **Два движка распознавания (STT):** Использует `faster-whisper` (отлично для смешанного англо-русского IT-кода) или `GigaAM` (очень быстрый для чистого русского языка). Оба работают локально.
 * **Нормализация:** LLM (например, Gemini или локальная модель) расставляет запятые, исправляет опечатки и форматирует термины.
-* **Интерактивный UI:** Плавающий виджет с галочкой для включения/выключения ИИ-коррекции.
+* **Интерактивный UI:** Плавающий виджет с чекбоксами для быстрого переключения ИИ-коррекции и звукового оповещения.
 * **Бекап-лог:** Консоль сохраняет историю расшифровок, не позволяя потерять текст.
 
 ## Документация и Установка
 Подробные инструкции по установке (простой через `.exe` и сложной из исходников) доступны здесь:
 
-🇷🇺 **[Руководство по настройке (Русский)](shockwave_setup_guide_rus.md)**
+🇷🇺 **[Руководство по настройке (Русский)](docs/shockwave_setup_guide_rus.md)**
 
 ---
 *"What is your command, Megatron?"*
