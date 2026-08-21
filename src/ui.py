@@ -26,7 +26,7 @@ class WinVoiceUI:
         self.queue = message_queue
         self.root = tk.Tk()
         
-        # Установка иконки приложения
+        # Set window icon
         icon_path = get_resource_path(os.path.join("icons", "icon.ico"))
         if os.path.exists(icon_path):
             try:
@@ -43,11 +43,11 @@ class WinVoiceUI:
         self.label = tk.Label(self.root, text=self.idle_text, bg="#2d2d2d", fg="white", font=("Segoe UI", 11), padx=10, pady=5)
         self.label.pack(pady=(5, 0))
         
-        # Контейнер для чекбоксов
+        # Checkbox controls container
         self.controls_frame = tk.Frame(self.root, bg="#2d2d2d")
         self.controls_frame.pack(pady=(0, 5))
         
-        # Чекбокс LLM norm
+        # LLM norm checkbox
         self.llm_enabled = False
         def toggle_llm():
             self.llm_enabled = self.use_llm_var.get()
@@ -68,7 +68,7 @@ class WinVoiceUI:
         )
         self.chk_llm.pack(side="left", padx=4)
         
-        # Чекбокс alert
+        # Alert sound checkbox
         self.alert_enabled = True
         def toggle_alert():
             self.alert_enabled = self.use_alert_var.get()
@@ -89,7 +89,7 @@ class WinVoiceUI:
         )
         self.chk_alert.pack(side="left", padx=4)
         
-        # Кнопка закрытия
+        # Close button
         def on_close(event=None):
             self.root.quit()
             
@@ -143,7 +143,7 @@ class WinVoiceUI:
                         self.root.after_cancel(self.reset_id)
                     self.label.config(text="✅ ready")
                     
-                    # Воспроизведение звука при готовности
+                    # Play sound on ready
                     if self.alert_enabled:
                         play_ready_sound()
                         
@@ -157,6 +157,3 @@ class WinVoiceUI:
             pass
         finally:
             self.root.after(100, self.check_queue)
-
-    def run(self):
-        self.root.mainloop()

@@ -3,18 +3,18 @@ import sys
 import subprocess
 from dotenv import load_dotenv, set_key
 
-# Гарантируем, что модули из src корректно импортируются
+# Ensure modules from src import cleanly
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
 def get_env_path():
-    # 1. Проверяем текущую рабочую директорию
+    # 1. Check current working directory
     cwd_env = os.path.abspath(".env")
     if os.path.exists(cwd_env):
         return cwd_env
         
-    # 2. Если запущен скомпилированный EXE (в dist/)
+    # 2. If running frozen executable (inside dist/)
     if getattr(sys, 'frozen', False):
         exe_dir = os.path.dirname(sys.executable)
         exe_env = os.path.join(exe_dir, ".env")
@@ -25,7 +25,7 @@ def get_env_path():
             return parent_env
         return cwd_env
         
-    # 3. Если запущен из исходников (src/launcher.py)
+    # 3. If running from source (src/launcher.py)
     root_dir = os.path.abspath(os.path.join(current_dir, ".."))
     candidate = os.path.join(root_dir, ".env")
     if os.path.exists(candidate):
@@ -87,35 +87,35 @@ def menu():
             else:
                 key_display = f"{llm_key[:4]}..."
         else:
-            key_display = "НЕ УСТАНОВЛЕН"
+            key_display = "NOT SET"
         
         print("================================================")
-        print("          SHOCKWAVE - ПАНЕЛЬ УПРАВЛЕНИЯ         ")
+        print("          SHOCKWAVE - CONTROL PANEL             ")
         print("================================================")
-        print("Текущие настройки:")
-        print(f"- STT Движок: {stt_display}")
-        print(f"- LLM Модель: {llm_model}")
-        print(f"- Ключ LLM:   {key_display}")
+        print("Current Settings:")
+        print(f"- STT Engine: {stt_display}")
+        print(f"- LLM Model:  {llm_model}")
+        print(f"- LLM Key:    {key_display}")
         print("================================================")
-        print("1. Запустить Shockwave")
-        print("2. Настроить API-ключ и LLM")
-        print("3. Выбрать движок распознавания (STT)")
-        print("4. Скачать/Проверить модели распознавания")
-        print("5. Выход")
+        print("1. Start Shockwave")
+        print("2. Configure API Key & LLM")
+        print("3. Select STT Engine")
+        print("4. Download / Verify STT Models")
+        print("5. Exit")
         print("================================================")
         
-        choice = input("Ваш выбор: ").strip()
+        choice = input("Your choice (1-5): ").strip()
         
         if choice == "1":
-            print("\nПроверка моделей перед запуском...")
+            print("\nChecking models before start...")
             import model_manager
             model_manager.check_and_prompt(auto_start=True)
             
-            # Синхронизируем перед запуском
+            # Synchronize active engine in config
             import config
             config.STT_ENGINE = read_env("STT_ENGINE", "gigaam")
             
-            print(f"\nЗапуск Shockwave ({stt_display})...")
+            print(f"\nStarting Shockwave ({stt_display})...")
             import main
             app = main.WinVoiceApp()
             app.run()
@@ -128,45 +128,45 @@ def menu():
         elif choice == "4":
             import model_manager
             model_manager.check_and_prompt(auto_start=False)
-            input("\nНажмите Enter, чтобы вернуться в меню...")
+            input("\nPress Enter to return to menu...")
         elif choice == "5":
             sys.exit(0)
 
 def setup_llm():
-    print("\n--- Настройка LLM ---")
+    print("\n--- LLM Settings ---")
     current_key = read_env("LLM_API_KEY", "")
-    key_info = f"{current_key[:7]}...{current_key[-4:]}" if len(current_key) > 10 else ("Установлен" if current_key else "Отсутствует")
-    print(f"Текущий ключ: {key_info}")
-    new_key = input("Введите новый API-ключ (или Enter, чтобы оставить без изменений): ").strip()
+    key_info = f"{current_key[:7]}...{current_key[-4:]}" if len(current_key) > 10 else ("Set" if current_key else "Not Set")
+    print(f"Current API Key: {key_info}")
+    new_key = input("Enter new API Key (or press Enter to keep current): ").strip()
     if new_key:
         update_env("LLM_API_KEY", new_key)
-        print("Ключ сохранен!")
+        print("API Key saved!")
         
     current_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
-    print(f"Текущая модель: {current_model}")
-    new_model = input("Введите название модели (или Enter, чтобы оставить без изменений): ").strip()
+    print(f"Current LLM Model: {current_model}")
+    new_model = input("Enter model name (or press Enter to keep current): ").strip()
     if new_model:
         update_env("LLM_MODEL", new_model)
-        print("Модель сохранена!")
+        print("Model saved!")
     
-    input("\nНажмите Enter для возврата...")
+    input("\nPress Enter to return...")
 
 def setup_stt():
-    print("\n--- Выбор движка распознавания (STT) ---")
+    print("\n--- Select STT Engine ---")
     whisper_m = read_env("WHISPER_MODEL", "large-v3-turbo")
     gigaam_m = read_env("GIGAAM_MODEL", "gigaam-v3-e2e-rnnt")
-    print(f"1. Whisper ({whisper_m}) — отлично для смешанной речи и IT-терминов")
-    print(f"2. GigaAM ({gigaam_m}) — очень быстро для русской речи")
+    print(f"1. Whisper ({whisper_m}) — great for mixed speech & IT terms")
+    print(f"2. GigaAM ({gigaam_m}) — ultra-fast for Russian speech")
     
-    choice = input("\nВыберите движок (1-2): ").strip()
+    choice = input("\nSelect engine (1-2): ").strip()
     if choice == "1":
         update_env("STT_ENGINE", "whisper")
-        print(f"Установлен движок: Whisper ({whisper_m})")
+        print(f"Selected engine: Whisper ({whisper_m})")
     elif choice == "2":
         update_env("STT_ENGINE", "gigaam")
-        print(f"Установлен движок: GigaAM ({gigaam_m})")
+        print(f"Selected engine: GigaAM ({gigaam_m})")
         
-    input("\nНажмите Enter для возврата...")
+    input("\nPress Enter to return...")
 
 if __name__ == "__main__":
     menu()

@@ -25,7 +25,7 @@ class WinVoiceApp:
         self.lock = threading.Lock()
         
         keyboard.add_hotkey(config.HOTKEY, self.on_hotkey, suppress=True)
-        print("Shockwave started. Press F12 to record.")
+        print(f"Shockwave started. Press {config.HOTKEY.upper()} to record.")
 
     def on_hotkey(self):
         with self.lock:

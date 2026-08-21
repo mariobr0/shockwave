@@ -12,7 +12,7 @@ class LLMNormalizer:
         if config.LLM_API_KEY:
             headers["Authorization"] = f"Bearer {config.LLM_API_KEY}"
             
-        user_prompt = f"Текст для исправления и пунктуации (верни ТОЛЬКО исправленный текст):\n{text}"
+        user_prompt = f"Raw transcript to punctuate and format (return ONLY the corrected text):\n{text}"
         
         payload = {
             "model": config.LLM_MODEL,
