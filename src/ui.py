@@ -156,13 +156,9 @@ class WinVoiceUI:
             bg=self.COLOR_BG,
             fg=self.COLOR_TEXT,
             font=("Segoe UI", 9),
-            anchor="w",
-            cursor="hand2"
+            anchor="w"
         )
         self.label.pack(fill="x", pady=(2, 2))
-        self.label.bind("<Button-1>", on_eye_click)
-        self.label.bind("<Enter>", on_eye_enter)
-        self.label.bind("<Leave>", on_eye_leave)
         
         # Checkbox controls container
         self.controls_frame = tk.Frame(self.right_frame, bg=self.COLOR_BG)
