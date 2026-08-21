@@ -9,11 +9,28 @@ if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
 def get_env_path():
+    # 1. Проверяем текущую рабочую директорию
+    cwd_env = os.path.abspath(".env")
+    if os.path.exists(cwd_env):
+        return cwd_env
+        
+    # 2. Если запущен скомпилированный EXE (в dist/)
     if getattr(sys, 'frozen', False):
-        return os.path.join(os.path.dirname(sys.executable), ".env")
+        # Проверяем рядом с EXE
+        exe_dir = os.path.dirname(sys.executable)
+        exe_env = os.path.join(exe_dir, ".env")
+        if os.path.exists(exe_env):
+            return exe_env
+        # Проверяем в родительской папке (корень проекта)
+        parent_env = os.path.abspath(os.path.join(exe_dir, "..", ".env"))
+        if os.path.exists(parent_env):
+            return parent_env
+        return cwd_env
+        
+    # 3. Если запущен из исходников (src/launcher.py)
     root_dir = os.path.abspath(os.path.join(current_dir, ".."))
     candidate = os.path.join(root_dir, ".env")
-    if os.path.exists(candidate) or not os.path.exists(".env"):
+    if os.path.exists(candidate):
         return candidate
     return ".env"
 
@@ -21,8 +38,10 @@ def ensure_env_exists():
     env_path = get_env_path()
     if not os.path.exists(env_path):
         with open(env_path, "w", encoding="utf-8") as f:
-            f.write("STT_ENGINE=whisper\n")
+            f.write("STT_ENGINE=gigaam\n")
             f.write("WHISPER_MODEL=large-v3-turbo\n")
+            f.write("GIGAAM_MODEL=gigaam-v3-e2e-rnnt\n")
+            f.write("GIGAAM_QUANTIZATION=int8\n")
             f.write("LLM_ENDPOINT=http://127.0.0.1:8045/v1/chat/completions\n")
             f.write("LLM_API_KEY=\n")
             f.write("LLM_MODEL=gemini-2.5-flash-lite\n")
@@ -30,13 +49,20 @@ def ensure_env_exists():
             f.write("UI_POSITION=bottom-left\n")
 
 def read_env(key, default=""):
-    load_dotenv(override=True)
+    env_path = get_env_path()
+    load_dotenv(env_path, override=True)
     return os.getenv(key, default)
 
 def update_env(key, value):
     env_path = get_env_path()
     set_key(env_path, key, value)
-    load_dotenv(override=True)
+    load_dotenv(env_path, override=True)
+    os.environ[key] = str(value)
+    try:
+        import config
+        setattr(config, key, value)
+    except Exception:
+        pass
 
 def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
@@ -45,11 +71,18 @@ def menu():
     ensure_env_exists()
     while True:
         clear_screen()
-        engine = read_env("STT_ENGINE", "whisper").upper()
+        engine = read_env("STT_ENGINE", "gigaam").upper()
         llm_key = read_env("LLM_API_KEY", "")
-        key_display = "Set" if llm_key else "NOT SET"
+        key_display = "Установлен" if llm_key else "НЕ УСТАНОВЛЕН"
         llm_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
         
+        print("================================================")
+        print("          SHOCKWAVE - ПАНЕЛЬ УПРАВЛЕНИЯ         ")
+        print("================================================")
+        print("Текущие настройки:")
+        print(f"- STT Движок: [{engine}]")
+        print(f"- LLM Модель: [{llm_model}]")
+        print(f"- Ключ LLM:   [{key_display}]")
         print("================================================")
         print("1. Запустить Shockwave (Старт)")
         print("2. Настроить API-ключ и LLM")
@@ -63,10 +96,13 @@ def menu():
         if choice == "1":
             print("\nПроверка моделей перед запуском...")
             import model_manager
-            # Передадим флаг, что мы запускаем из лаунчера
             model_manager.check_and_prompt(auto_start=True)
             
-            print("\nЗапуск Shockwave... (Логи будут выводиться в этот терминал)")
+            # Синхронизируем перед запуском
+            import config
+            config.STT_ENGINE = read_env("STT_ENGINE", "gigaam")
+            
+            print(f"\nЗапуск Shockwave с движком [{config.STT_ENGINE}]...")
             import main
             app = main.WinVoiceApp()
             app.run()

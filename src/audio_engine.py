@@ -25,7 +25,7 @@ class AudioEngine:
         self.sample_rate = 16000
         self.is_recording = False
         
-        self.engine_type = config.STT_ENGINE.lower()
+        self.engine_type = (os.getenv("STT_ENGINE") or config.STT_ENGINE).lower()
         self.model = None
         
         print(f"Initializing STT Engine ({self.engine_type})...")

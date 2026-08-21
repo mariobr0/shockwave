@@ -1,27 +1,48 @@
 import os
 import sys
 
-# Отключаем предупреждение об отсутствии токена Hugging Face
+# Отключаем предупреждения Hugging Face
 os.environ["HF_HUB_DISABLE_IMPLICIT_TOKEN"] = "1"
 os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
 
 from huggingface_hub import constants
 from faster_whisper import download_model
-from dotenv import set_key
+from dotenv import set_key, load_dotenv
 
 import config
 
+def get_env_path():
+    cwd_env = os.path.abspath(".env")
+    if os.path.exists(cwd_env):
+        return cwd_env
+    if getattr(sys, 'frozen', False):
+        exe_dir = os.path.dirname(sys.executable)
+        exe_env = os.path.join(exe_dir, ".env")
+        if os.path.exists(exe_env):
+            return exe_env
+        parent_env = os.path.abspath(os.path.join(exe_dir, "..", ".env"))
+        if os.path.exists(parent_env):
+            return parent_env
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    candidate = os.path.join(root_dir, ".env")
+    if os.path.exists(candidate):
+        return candidate
+    return ".env"
+
 def update_env(key, value):
-    env_path = ".env"
+    env_path = get_env_path()
     if not os.path.exists(env_path):
         with open(env_path, "w", encoding="utf-8") as f:
             f.write("\n")
     set_key(env_path, key, value)
+    load_dotenv(env_path, override=True)
+    os.environ[key] = str(value)
+    setattr(config, key, value)
 
 def check_and_prompt(auto_start=True):
-    whisper_model = config.WHISPER_MODEL
-    gigaam_model = "gigaam-v3-e2e-rnnt"
-    engine = config.STT_ENGINE.lower()
+    whisper_model = os.getenv("WHISPER_MODEL", config.WHISPER_MODEL)
+    gigaam_model = os.getenv("GIGAAM_MODEL", config.GIGAAM_MODEL)
+    engine = (os.getenv("STT_ENGINE") or config.STT_ENGINE).lower()
     
     needs_download = False
     
@@ -86,7 +107,6 @@ def check_and_prompt(auto_start=True):
         download_model(whisper_model)
         if choice == "1" and engine != "whisper":
             update_env("STT_ENGINE", "whisper")
-            config.STT_ENGINE = "whisper"
             print("Настройка в .env автоматически изменена на STT_ENGINE=whisper")
             
     if choice in ["2", "3"]:
@@ -97,11 +117,8 @@ def check_and_prompt(auto_start=True):
         
         if choice == "2" and engine != "gigaam":
             update_env("STT_ENGINE", "gigaam")
-            config.STT_ENGINE = "gigaam"
             print("Настройка в .env автоматически изменена на STT_ENGINE=gigaam")
             
         update_env("GIGAAM_QUANTIZATION", quant_choice)
-        config.GIGAAM_QUANTIZATION = quant_choice
 
     print("\n✅ Все необходимые модели успешно скачаны!\n")
-
