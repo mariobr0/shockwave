@@ -10,3 +10,4 @@ build/
 *.spec
 *.psd
 *.exe
+*.lnk

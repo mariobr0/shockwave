@@ -12,10 +12,9 @@ python -m PyInstaller --name Shockwave --onefile --console --icon=icons\icon.ico
 
 echo.
 if exist "dist\Shockwave.exe" (
-    echo Copying Shockwave.exe to project root...
-    copy /y "dist\Shockwave.exe" "Shockwave.exe" >nul
+    powershell -NoProfile -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%~dp0Shockwave.lnk'); $s.TargetPath = '%~dp0dist\Shockwave.exe'; $s.WorkingDirectory = '%~dp0'; $s.IconLocation = '%~dp0icons\icon.ico,0'; $s.Save()"
     echo ===================================================
-    echo DONE! Shockwave.exe is ready in the project root folder!
+    echo DONE! Shockwave.lnk shortcut is ready in the root!
     echo ===================================================
 ) else (
     echo Build failed. Please check the logs above.
