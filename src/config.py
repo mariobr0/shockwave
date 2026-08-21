@@ -33,7 +33,7 @@ GIGAAM_MODEL_PATH = os.getenv("GIGAAM_MODEL_PATH", "")
 GIGAAM_QUANTIZATION = os.getenv("GIGAAM_QUANTIZATION", "int8")
 
 APP_LANGUAGE = os.getenv("APP_LANGUAGE", "en")
-APP_VERSION = "0.9.1"
+APP_VERSION = "0.9.2"
 
 LLM_ENDPOINT = os.getenv("LLM_ENDPOINT", "")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")

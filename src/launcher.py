@@ -3,6 +3,12 @@ import sys
 import subprocess
 from dotenv import load_dotenv, set_key
 
+# Enable UTF-8 encoding for console output
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 # Ensure modules from src import cleanly
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
@@ -10,13 +16,20 @@ if current_dir not in sys.path:
 
 import config
 
+def get_resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    candidate = os.path.join(root_path, relative_path)
+    if os.path.exists(candidate):
+        return candidate
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
+
 def get_env_path():
-    # 1. Check current working directory
     cwd_env = os.path.abspath(".env")
     if os.path.exists(cwd_env):
         return cwd_env
         
-    # 2. If running frozen executable (inside dist/)
     if getattr(sys, 'frozen', False):
         exe_dir = os.path.dirname(sys.executable)
         exe_env = os.path.join(exe_dir, ".env")
@@ -27,7 +40,6 @@ def get_env_path():
             return parent_env
         return cwd_env
         
-    # 3. If running from source (src/launcher.py)
     root_dir = os.path.abspath(os.path.join(current_dir, ".."))
     candidate = os.path.join(root_dir, ".env")
     if os.path.exists(candidate):
@@ -68,10 +80,27 @@ def update_env(key, value):
 def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
 
+def print_banner():
+    ansi_path = get_resource_path(os.path.join("icons", "shockwave_transparent.ansi"))
+    if os.path.exists(ansi_path):
+        try:
+            with open(ansi_path, "r", encoding="utf-8") as f:
+                print(f.read())
+        except Exception:
+            pass
+
 def menu():
     ensure_env_exists()
+    
+    # ANSI color codes
+    PURPLE = "\033[38;2;180;95;235m"
+    RESET = "\033[0m"
+    BOLD = "\033[1m"
+    
     while True:
         clear_screen()
+        print_banner()
+        
         lang = read_env("APP_LANGUAGE", "en").lower()
         engine = read_env("STT_ENGINE", "gigaam").lower()
         
@@ -87,47 +116,47 @@ def menu():
         llm_endpoint = read_env("LLM_ENDPOINT", "")
         llm_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
         llm_key = read_env("LLM_API_KEY", "")
-        version = getattr(config, "APP_VERSION", "0.9.0")
+        version = getattr(config, "APP_VERSION", "0.9.2")
         
         if lang == "ru":
             endpoint_display = llm_endpoint if llm_endpoint else "НЕ УСТАНОВЛЕН"
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "НЕ УСТАНОВЛЕН")
-            print("================================================")
-            print(f"       SHOCKWAVE v{version} - ПАНЕЛЬ УПРАВЛЕНИЯ     ")
-            print("================================================")
+            print(f"{PURPLE}{BOLD}===================================================={RESET}")
+            print(f"      {PURPLE}{BOLD}SHOCKWAVE v{version} - ПАНЕЛЬ УПРАВЛЕНИЯ{RESET}")
+            print(f"{PURPLE}{BOLD}===================================================={RESET}")
             print("Текущие настройки:")
             print(f"- STT Движок:   {stt_display}")
             print(f"- LLM Эндпоинт: {endpoint_display}")
             print(f"- LLM Модель:   {llm_model}")
             print(f"- Ключ LLM:     {key_display}")
-            print("================================================")
+            print(f"{PURPLE}{BOLD}===================================================={RESET}")
             print("1. Запустить Shockwave")
             print("2. Настроить API-ключ и LLM")
             print("3. Выбрать движок распознавания (STT)")
             print("4. Скачать/Проверить модели распознавания")
             print("5. Change language to English")
             print("6. Выход")
-            print("================================================")
+            print(f"{PURPLE}{BOLD}===================================================={RESET}")
             prompt_text = "Ваш выбор (1-6): "
         else:
             endpoint_display = llm_endpoint if llm_endpoint else "NOT SET"
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "NOT SET")
-            print("================================================")
-            print(f"        SHOCKWAVE v{version} - CONTROL PANEL        ")
-            print("================================================")
+            print(f"{PURPLE}{BOLD}===================================================={RESET}")
+            print(f"       {PURPLE}{BOLD}SHOCKWAVE v{version} - CONTROL PANEL{RESET}")
+            print(f"{PURPLE}{BOLD}===================================================={RESET}")
             print("Current Settings:")
             print(f"- STT Engine:   {stt_display}")
             print(f"- LLM Endpoint: {endpoint_display}")
             print(f"- LLM Model:    {llm_model}")
             print(f"- LLM Key:      {key_display}")
-            print("================================================")
+            print(f"{PURPLE}{BOLD}===================================================={RESET}")
             print("1. Start Shockwave")
             print("2. Configure API Key & LLM")
             print("3. Select STT Engine")
             print("4. Download / Verify STT Models")
             print("5. Сменить язык на русский")
             print("6. Exit")
-            print("================================================")
+            print(f"{PURPLE}{BOLD}===================================================={RESET}")
             prompt_text = "Your choice (1-6): "
         
         choice = input(prompt_text).strip()
