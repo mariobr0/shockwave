@@ -85,7 +85,11 @@ def print_banner():
     if os.path.exists(ansi_path):
         try:
             with open(ansi_path, "r", encoding="utf-8") as f:
-                print(f.read())
+                lines = f.read().split("\n")
+                pad = " " * 7
+                for line in lines:
+                    if line.strip():
+                        print(pad + line)
         except Exception:
             pass
 
