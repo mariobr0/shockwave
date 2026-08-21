@@ -97,7 +97,7 @@ def menu():
         print(f"- LLM Модель: {llm_model}")
         print(f"- Ключ LLM:   {key_display}")
         print("================================================")
-        print("1. Запустить Shockwave (Старт)")
+        print("1. Запустить Shockwave")
         print("2. Настроить API-ключ и LLM")
         print("3. Выбрать движок распознавания (STT)")
         print("4. Скачать/Проверить модели распознавания")
@@ -133,8 +133,7 @@ def menu():
             sys.exit(0)
 
 def setup_llm():
-    clear_screen()
-    print("--- Настройка LLM ---")
+    print("\n--- Настройка LLM ---")
     current_key = read_env("LLM_API_KEY", "")
     key_info = f"{current_key[:7]}...{current_key[-4:]}" if len(current_key) > 10 else ("Установлен" if current_key else "Отсутствует")
     print(f"Текущий ключ: {key_info}")
@@ -144,7 +143,7 @@ def setup_llm():
         print("Ключ сохранен!")
         
     current_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
-    print(f"\nТекущая модель: {current_model}")
+    print(f"Текущая модель: {current_model}")
     new_model = input("Введите название модели (или Enter, чтобы оставить без изменений): ").strip()
     if new_model:
         update_env("LLM_MODEL", new_model)
@@ -153,12 +152,11 @@ def setup_llm():
     input("\nНажмите Enter для возврата...")
 
 def setup_stt():
-    clear_screen()
-    print("--- Выбор движка распознавания (STT) ---")
+    print("\n--- Выбор движка распознавания (STT) ---")
     whisper_m = read_env("WHISPER_MODEL", "large-v3-turbo")
     gigaam_m = read_env("GIGAAM_MODEL", "gigaam-v3-e2e-rnnt")
     print(f"1. Whisper ({whisper_m}) — отлично для смешанной речи и IT-терминов")
-    print(f"2. GigaAM ({gigaam_m}) — очень быстро для чистой русской речи")
+    print(f"2. GigaAM ({gigaam_m}) — очень быстро для русской речи")
     
     choice = input("\nВыберите движок (1-2): ").strip()
     if choice == "1":
