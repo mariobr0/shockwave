@@ -92,6 +92,11 @@ def print_banner():
                         print(pad + line)
         except Exception:
             pass
+            
+    # Iconic tagline centered in yellow (#FFD700)
+    tagline = "WHAT IS YOUR COMMAND, MEGATRON?"
+    yellow_quote = "\033[1;3;38;2;255;215;0m" + tagline + "\033[0m"
+    print(f"\n          {yellow_quote}\n")
 
 def menu():
     ensure_env_exists()
