@@ -2,10 +2,19 @@ import tkinter as tk
 import queue
 import os
 import sys
+import winsound
 
 def get_resource_path(relative_path):
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
+
+def play_ready_sound():
+    sound_path = get_resource_path(os.path.join("alert", "ready.wav"))
+    if os.path.exists(sound_path):
+        try:
+            winsound.PlaySound(sound_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+        except Exception as e:
+            print(f"Audio playback error: {e}")
 
 class WinVoiceUI:
     def __init__(self, message_queue, position="bottom-left"):
@@ -29,14 +38,18 @@ class WinVoiceUI:
         self.label = tk.Label(self.root, text=self.idle_text, bg="#2d2d2d", fg="white", font=("Segoe UI", 11), padx=10, pady=5)
         self.label.pack(pady=(5, 0))
         
-        self.llm_enabled = False
+        # Контейнер для чекбоксов
+        self.controls_frame = tk.Frame(self.root, bg="#2d2d2d")
+        self.controls_frame.pack(pady=(0, 5))
         
+        # Чекбокс LLM norm
+        self.llm_enabled = False
         def toggle_llm():
             self.llm_enabled = self.use_llm_var.get()
             
         self.use_llm_var = tk.BooleanVar(value=False)
-        self.chk = tk.Checkbutton(
-            self.root,
+        self.chk_llm = tk.Checkbutton(
+            self.controls_frame,
             text="LLM norm",
             variable=self.use_llm_var,
             command=toggle_llm,
@@ -48,7 +61,28 @@ class WinVoiceUI:
             font=("Segoe UI", 9),
             cursor="hand2"
         )
-        self.chk.pack(pady=(0, 5))
+        self.chk_llm.pack(side="left", padx=4)
+        
+        # Чекбокс alert
+        self.alert_enabled = True
+        def toggle_alert():
+            self.alert_enabled = self.use_alert_var.get()
+            
+        self.use_alert_var = tk.BooleanVar(value=True)
+        self.chk_alert = tk.Checkbutton(
+            self.controls_frame,
+            text="alert",
+            variable=self.use_alert_var,
+            command=toggle_alert,
+            bg="#2d2d2d",
+            fg="#aaaaaa",
+            selectcolor="#2d2d2d",
+            activebackground="#2d2d2d",
+            activeforeground="white",
+            font=("Segoe UI", 9),
+            cursor="hand2"
+        )
+        self.chk_alert.pack(side="left", padx=4)
         
         # Кнопка закрытия
         def on_close(event=None):
@@ -62,7 +96,7 @@ class WinVoiceUI:
         
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        width = 200
+        width = 230
         height = 65
         
         if position == "bottom-right":
@@ -103,6 +137,11 @@ class WinVoiceUI:
                     if self.reset_id:
                         self.root.after_cancel(self.reset_id)
                     self.label.config(text="✅ ready")
+                    
+                    # Воспроизведение звука при готовности
+                    if self.alert_enabled:
+                        play_ready_sound()
+                        
                     # Return to idle after 5 seconds
                     self.reset_id = self.root.after(5000, self.reset_to_idle)
                     
