@@ -1,4 +1,6 @@
-![Shockwave](docs/shockwave.gif)
+<p align="center">
+  <img src="docs/shockwave.gif" alt="Shockwave">
+</p>
 
 # Shockwave
 
