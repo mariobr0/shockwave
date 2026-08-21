@@ -1,14 +1,29 @@
-﻿venv/
+# Virtual Environment & Python cache
+venv/
 __pycache__/
-*.wav
-*.txt
-*.log
+*.pyc
+
+# Environment & Secrets
 .env
-!requirements.txt
+
+# Build outputs & Executables
 dist/
 build/
 *.spec
-*.psd
 *.exe
 *.lnk
-models/
+
+# Logs & Temporary files
+*.log
+temp_audio.wav
+*.wav
+!alert/ready.wav
+
+# Models (weights are downloaded via launcher, keep folder structure)
+models/whisper/*
+!models/whisper/.gitkeep
+models/gigaam/*
+!models/gigaam/.gitkeep
+
+# Other temp formats
+*.psd
