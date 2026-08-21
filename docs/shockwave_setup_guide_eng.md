@@ -24,10 +24,12 @@
    ```
    The script compiles `dist\Shockwave.exe` and creates the `Shockwave.lnk` shortcut in the project root.
 
+*(Note: If you prefer not to compile an `.exe`, you can run the application directly via Python by double-clicking **`start.bat`**).*
+
 ---
 
 ### 3. First Launch & Configuration
-1. Launch `Shockwave.lnk` (or `dist\Shockwave.exe`).
+1. Launch `Shockwave.lnk` (or `start.bat`).
 2. In the Control Panel:
    * **Option 2 (`Configure API Key & LLM`):** Enter your LLM API key for text normalization.
    * **Option 3 (`Select STT Engine`):** Choose `Whisper` (for code / mixed speech) or `GigaAM` (for Russian speech).
