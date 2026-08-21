@@ -8,6 +8,8 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
+import config
+
 def get_env_path():
     # 1. Check current working directory
     cwd_env = os.path.abspath(".env")
@@ -58,7 +60,6 @@ def update_env(key, value):
     load_dotenv(env_path, override=True)
     os.environ[key] = str(value)
     try:
-        import config
         setattr(config, key, value)
     except Exception:
         pass
@@ -84,7 +85,6 @@ def menu():
 
         llm_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
         llm_key = read_env("LLM_API_KEY", "")
-        
         version = getattr(config, "APP_VERSION", "0.9.0")
         
         if lang == "ru":
@@ -136,7 +136,6 @@ def menu():
             model_manager.check_and_prompt(auto_start=True)
             
             # Synchronize active engine in config
-            import config
             config.STT_ENGINE = read_env("STT_ENGINE", "gigaam")
             
             if lang == "ru":
