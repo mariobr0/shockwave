@@ -7,6 +7,17 @@ import threading
 
 import config
 
+import importlib.metadata
+_original_version = importlib.metadata.version
+def _safe_version(pkg_name):
+    if "onnx" in pkg_name or "asr" in pkg_name:
+        return "0.12.0"
+    try:
+        return _original_version(pkg_name)
+    except importlib.metadata.PackageNotFoundError:
+        return "0.0.0"
+importlib.metadata.version = _safe_version
+
 class AudioEngine:
     def __init__(self):
         self.stream = None

@@ -36,16 +36,9 @@ def menu():
         clear_screen()
         engine = read_env("STT_ENGINE", "whisper").upper()
         llm_key = read_env("LLM_API_KEY", "")
-        key_display = "Установлен" if llm_key else "НЕ УСТАНОВЛЕН"
+        key_display = "Set" if llm_key else "NOT SET"
         llm_model = read_env("LLM_MODEL", "gemini-3.1-flash-lite")
         
-        print("================================================")
-        print("          SHOCKWAVE - ПАНЕЛЬ УПРАВЛЕНИЯ         ")
-        print("================================================")
-        print("Текущие настройки:")
-        print(f"- STT Движок: [{engine}]")
-        print(f"- LLM Модель: [{llm_model}]")
-        print(f"- Ключ LLM:   [{key_display}]")
         print("================================================")
         print("1. Запустить Shockwave (Старт)")
         print("2. Настроить API-ключ и LLM")
@@ -63,7 +56,9 @@ def menu():
             model_manager.check_and_prompt(auto_start=True)
             
             print("\nЗапуск Shockwave... (Логи будут выводиться в этот терминал)")
-            subprocess.run([sys.executable, "main.py"])
+            import main
+            app = main.WinVoiceApp()
+            app.run()
             sys.exit(0)
             
         elif choice == "2":
