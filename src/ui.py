@@ -93,8 +93,8 @@ class WinVoiceUI:
         def on_close(event=None):
             self.root.quit()
             
-        self.close_btn = tk.Label(self.root, text="✖", bg="#2d2d2d", fg="#888888", font=("Segoe UI", 9), cursor="hand2")
-        self.close_btn.place(relx=1.0, rely=0.0, anchor="ne", x=-2, y=2)
+        self.close_btn = tk.Label(self.root, text="×", bg="#2d2d2d", fg="#888888", font=("Segoe UI", 10, "bold"), cursor="hand2")
+        self.close_btn.place(relx=1.0, rely=0.0, anchor="ne", x=-3, y=1)
         self.close_btn.bind("<Button-1>", on_close)
         self.close_btn.bind("<Enter>", lambda e: self.close_btn.config(fg="#ff4444"))
         self.close_btn.bind("<Leave>", lambda e: self.close_btn.config(fg="#888888"))
@@ -141,7 +141,7 @@ class WinVoiceUI:
                 elif cmd == "show_ready":
                     if self.reset_id:
                         self.root.after_cancel(self.reset_id)
-                    self.label.config(text="✅ ready")
+                    self.label.config(text="ready")
                     
                     # Play sound on ready
                     if self.alert_enabled:
