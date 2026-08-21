@@ -45,16 +45,16 @@ class WinVoiceUI:
         # 80% opacity
         self.root.attributes("-alpha", 0.80)
         
-        # Shockwave signature purple palette
-        self.COLOR_BG = "#643884"
-        self.COLOR_GRIP = "#4d2769"
-        self.COLOR_GRIP_HOVER = "#6f3f93"
+        # Shockwave deep royal purple palette #3b274d
+        self.COLOR_BG = "#3b274d"
+        self.COLOR_GRIP = "#2c1c3b"
+        self.COLOR_GRIP_HOVER = "#4c3363"
         self.COLOR_TEXT = "#ffffff"
-        self.COLOR_MUTED = "#cfb7e6"
+        self.COLOR_MUTED = "#c4b0d9"
         
-        self.COLOR_INACTIVE_FILL = "#402257"
+        self.COLOR_INACTIVE_FILL = "#271836"
         self.COLOR_INACTIVE_OUTLINE = "#FFD700"
-        self.COLOR_HOVER_FILL = "#7b47a3"
+        self.COLOR_HOVER_FILL = "#53376e"
         self.COLOR_HOVER_OUTLINE = "#FFF59D"
         self.COLOR_ACTIVE_FILL = "#FFD700"
         self.COLOR_ACTIVE_OUTLINE = "#FFD700"
