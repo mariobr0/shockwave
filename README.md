@@ -1,6 +1,6 @@
 ![Shockwave](docs/shockwave.gif)
 
-# Shockwave (v0.9.0)
+# Shockwave
 
 *(Описание на русском ниже)*
 
@@ -17,10 +17,10 @@
 * **Global Hotkey:** Default `F12`. Works across any Windows application.
 * **Dual Speech-to-Text (STT):** Choose between Whisper (mixed IT speech) and GigaAM (ultra-fast Russian speech).
 * **Fully Portable & Offline Ready:** All downloaded neural network models are stored locally inside the project's `models/` directory.
-* **Bilingual Interactive Launcher:** Console control panel supporting on-the-fly language switching (English / Russian), model management, and API key configuration.
+* **Bilingual Interactive Launcher:** Console control panel supporting language switching (English / Russian), model management, and API key configuration.
 * **Minimalist Floating Widget:** Clean on-screen status indicators with checkboxes to toggle LLM normalization and audio alerts.
 * **Audio Notifications:** Subtle sound notification plays when transcription is copied and ready to paste.
-* **Safe Terminal Logging:** The console maintains a real-time transcript history to ensure no dictated text is lost.
+* **Safe Terminal Logging:** The console maintains a real-time transcript history to ensure no dictated text is lost in current session.
 
 ## Documentation & Installation
 Detailed guides are available below:
@@ -30,7 +30,7 @@ Detailed guides are available below:
 
 ---
 
-# Shockwave (v0.9.0)
+# Shockwave
 
 **Shockwave** — это легковесный инструмент для голосовой диктовки на Windows, работающий в фоновом режиме. Он позволяет надиктовывать текст по нажатию глобальной горячей клавиши, автоматически расставляет знаки препинания с помощью нейросети и копирует результат в буфер обмена.
 
@@ -45,10 +45,10 @@ Detailed guides are available below:
 * **Глобальная кнопка:** По умолчанию `F12`. Работает в любых программах Windows.
 * **Два движка распознавания (STT):** Быстрый выбор между Whisper (для смешанной IT-речи) и GigaAM (очень быстрый для русской речи).
 * **Полная портативность:** Все скачиваемые модели сохраняются локально в папку `models/` внутри проекта.
-* **Двуязычная панель управления:** Консольный лаунчер с поддержкой переключения языка на лету (RU / EN), проверки моделей и настройки API-ключа.
+* **Двуязычная панель управления:** Консольный лаунчер с поддержкой переключения языка (RU / EN), проверки моделей и настройки API-ключа.
 * **Минималистичный виджет:** Аккуратная плашка статуса с переключателями LLM-нормализации и звуковых оповещений.
 * **Звуковой сигнал:** Аудио-оповещение при успешном завершении диктовки.
-* **Бекап-лог:** Консоль сохраняет историю расшифровок, исключая потерю надиктованного текста.
+* **Бекап-лог:** Консоль сохраняет лог и всю историю расшифровок, исключая потерю надиктованного текста в рамках открытой сессии.
 
 ## Документация и Установка
 Подробные инструкции по установке:
