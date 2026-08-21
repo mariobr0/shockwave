@@ -28,7 +28,8 @@ class WinVoiceApp:
         
         # Register permanent system-level hotkey via Win32 RegisterHotKey
         self.hotkey_mgr = SystemHotkeyManager(config.HOTKEY, self.toggle_recording)
-        print(f"Shockwave started. Press {config.HOTKEY.upper()} or click the Eye to record.")
+        yellow_eye = "\033[38;2;255;215;0m\033[1mEye\033[0m"
+        print(f"Shockwave started. Press {config.HOTKEY.upper()} or click the {yellow_eye} to record.")
 
     def toggle_recording(self):
         with self.lock:
