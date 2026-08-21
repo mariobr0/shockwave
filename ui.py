@@ -1,10 +1,25 @@
 import tkinter as tk
 import queue
+import os
+import sys
+
+def get_resource_path(relative_path):
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
 
 class WinVoiceUI:
     def __init__(self, message_queue, position="bottom-left"):
         self.queue = message_queue
         self.root = tk.Tk()
+        
+        # Установка иконки приложения
+        icon_path = get_resource_path(os.path.join("icons", "icon.ico"))
+        if os.path.exists(icon_path):
+            try:
+                self.root.iconbitmap(icon_path)
+            except Exception:
+                pass
+                
         self.root.overrideredirect(True)
         self.root.attributes("-topmost", True)
         self.root.attributes("-alpha", 0.9)
