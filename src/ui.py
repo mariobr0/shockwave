@@ -4,6 +4,7 @@ import os
 import sys
 import winsound
 import ctypes
+import config
 
 def get_resource_path(relative_path):
     if hasattr(sys, '_MEIPASS'):
@@ -21,6 +22,14 @@ def play_ready_sound():
             winsound.PlaySound(sound_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
         except Exception as e:
             print(f"Audio playback error: {e}")
+
+def play_startup_sound():
+    sound_path = get_resource_path(os.path.join("alert", "megatron.wav"))
+    if os.path.exists(sound_path):
+        try:
+            winsound.PlaySound(sound_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+        except Exception as e:
+            print(f"Startup audio error: {e}")
 
 class WinVoiceUI:
     def __init__(self, message_queue, position="bottom-left", on_trigger=None):
@@ -42,8 +51,9 @@ class WinVoiceUI:
         self.root.overrideredirect(True)
         self.root.attributes("-topmost", True)
         
-        # 80% opacity
-        self.root.attributes("-alpha", 0.80)
+        # Configurable opacity from .env (default 0.80)
+        opacity = getattr(config, "UI_OPACITY", 0.80)
+        self.root.attributes("-alpha", opacity)
         
         # Shockwave deep royal purple palette #3b274d
         self.COLOR_BG = "#3b274d"
@@ -186,12 +196,12 @@ class WinVoiceUI:
         )
         self.chk_llm.pack(side="left", padx=(0, 6))
         
-        # Alert sound checkbox
-        self.alert_enabled = True
+        # Alert sound checkbox (initial value from .env ALERT_SOUND)
+        self.alert_enabled = getattr(config, "ALERT_SOUND", True)
         def toggle_alert():
             self.alert_enabled = self.use_alert_var.get()
             
-        self.use_alert_var = tk.BooleanVar(value=True)
+        self.use_alert_var = tk.BooleanVar(value=self.alert_enabled)
         self.chk_alert = tk.Checkbutton(
             self.controls_frame,
             text="alert",
@@ -279,9 +289,11 @@ class WinVoiceUI:
             print(f"Taskbar style notice: {e}")
 
     def show_window(self):
-        """Displays the ready widget in its exact geometry smoothly."""
+        """Displays the ready widget and plays startup quote if alert sound is enabled."""
         self.root.deiconify()
         self.setup_taskbar_style()
+        if self.alert_enabled:
+            play_startup_sound()
 
     def reset_to_idle(self):
         self.label.config(text=self.idle_text)

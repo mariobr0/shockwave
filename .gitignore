@@ -17,7 +17,7 @@ build/
 *.log
 temp_audio.wav
 *.wav
-!alert/ready.wav
+!alert/*.wav
 
 # Models (weights are downloaded via launcher, keep folder structure)
 models/whisper/*
