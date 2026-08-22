@@ -95,6 +95,62 @@ class WNDCLASSW(ctypes.Structure):
         ("lpszClassName", wintypes.LPCWSTR),
     ]
 
+class GUID(ctypes.Structure):
+    _fields_ = [
+        ('Data1', wintypes.DWORD),
+        ('Data2', wintypes.WORD),
+        ('Data3', wintypes.WORD),
+        ('Data4', wintypes.BYTE * 8)
+    ]
+
+CLSID_TaskbarList = GUID(0x56FDF344, 0xFD6D, 0x11d0, (wintypes.BYTE * 8)(0x95, 0x8A, 0x00, 0x60, 0x97, 0xC9, 0xA0, 0x90))
+IID_ITaskbarList = GUID(0x56FDF342, 0xFD6D, 0x11d0, (wintypes.BYTE * 8)(0x95, 0x8A, 0x00, 0x60, 0x97, 0xC9, 0xA0, 0x90))
+
+class ITaskbarListVtbl(ctypes.Structure):
+    _fields_ = [
+        ('QueryInterface', ctypes.c_void_p),
+        ('AddRef', ctypes.c_void_p),
+        ('Release', ctypes.WINFUNCTYPE(wintypes.ULONG, ctypes.c_void_p)),
+        ('HrInit', ctypes.c_void_p),
+        ('AddTab', ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, wintypes.HWND)),
+        ('DeleteTab', ctypes.WINFUNCTYPE(ctypes.c_long, ctypes.c_void_p, wintypes.HWND)),
+        ('ActivateTab', ctypes.c_void_p),
+        ('SetActiveAlt', ctypes.c_void_p),
+    ]
+
+class ITaskbarList(ctypes.Structure):
+    _fields_ = [('lpVtbl', ctypes.POINTER(ITaskbarListVtbl))]
+
+def delete_taskbar_tab(hwnd):
+    """Removes the window's button/tab from the Windows taskbar."""
+    if not hwnd:
+        return
+    try:
+        ole32 = ctypes.oledll.ole32
+        ole32.CoInitialize(None)
+        pTaskbarList = ctypes.POINTER(ITaskbarList)()
+        hr = ole32.CoCreateInstance(ctypes.byref(CLSID_TaskbarList), None, 1, ctypes.byref(IID_ITaskbarList), ctypes.byref(pTaskbarList))
+        if hr == 0 and pTaskbarList:
+            pTaskbarList.contents.lpVtbl.contents.DeleteTab(pTaskbarList, hwnd)
+            pTaskbarList.contents.lpVtbl.contents.Release(pTaskbarList)
+    except Exception:
+        pass
+
+def add_taskbar_tab(hwnd):
+    """Restores the window's button/tab to the Windows taskbar."""
+    if not hwnd:
+        return
+    try:
+        ole32 = ctypes.oledll.ole32
+        ole32.CoInitialize(None)
+        pTaskbarList = ctypes.POINTER(ITaskbarList)()
+        hr = ole32.CoCreateInstance(ctypes.byref(CLSID_TaskbarList), None, 1, ctypes.byref(IID_ITaskbarList), ctypes.byref(pTaskbarList))
+        if hr == 0 and pTaskbarList:
+            pTaskbarList.contents.lpVtbl.contents.AddTab(pTaskbarList, hwnd)
+            pTaskbarList.contents.lpVtbl.contents.Release(pTaskbarList)
+    except Exception:
+        pass
+
 def get_root_console_hwnd():
     """Returns the top-level root window for the console (Windows Terminal or ConHost)."""
     try:
@@ -107,15 +163,17 @@ def get_root_console_hwnd():
         return 0
 
 def hide_console():
-    """Hides the top-level console window from desktop and taskbar."""
+    """Hides the top-level console window from desktop and removes its button from the taskbar."""
     hwnd = get_root_console_hwnd()
     if hwnd:
         user32.ShowWindow(hwnd, SW_HIDE)
+        delete_taskbar_tab(hwnd)
 
 def show_console():
     """Restores and brings the top-level console window to the foreground with full history intact."""
     hwnd = get_root_console_hwnd()
     if hwnd:
+        add_taskbar_tab(hwnd)
         user32.ShowWindow(hwnd, SW_SHOW)
         user32.ShowWindow(hwnd, SW_RESTORE)
         user32.SetForegroundWindow(hwnd)

@@ -40,16 +40,23 @@ class WinVoiceUI:
         # Hide window immediately during setup to avoid top-left blank flash
         self.root.withdraw()
         
-        # Set window icon
-        icon_path = get_resource_path(os.path.join("icons", "icon.ico"))
-        if os.path.exists(icon_path):
-            try:
-                self.root.iconbitmap(icon_path)
-            except Exception:
-                pass
-                
         self.root.overrideredirect(True)
         self.root.attributes("-topmost", True)
+        
+        # Prevent floating overlay from ever creating a button on the taskbar
+        try:
+            hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
+            if not hwnd:
+                hwnd = self.root.winfo_id()
+            GWL_EXSTYLE = -20
+            WS_EX_TOOLWINDOW = 0x00000080
+            WS_EX_APPWINDOW = 0x00040000
+            
+            style = ctypes.windll.user32.GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
+            style = (style | WS_EX_TOOLWINDOW) & ~WS_EX_APPWINDOW
+            ctypes.windll.user32.SetWindowLongPtrW(hwnd, GWL_EXSTYLE, style)
+        except Exception:
+            pass
         
         # Configurable opacity from .env (default 0.80)
         opacity = getattr(config, "UI_OPACITY", 0.80)
