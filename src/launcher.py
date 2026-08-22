@@ -283,9 +283,6 @@ def setup_stt(lang="en"):
 if __name__ == "__main__":
     # Direct silent widget launch via --widget / --silent argument
     if "--widget" in sys.argv or "--silent" in sys.argv:
-        from tray_manager import hide_console
-        hide_console()
-        
         from single_instance import check_single_instance
         if not check_single_instance():
             sys.exit(0)
@@ -295,6 +292,9 @@ if __name__ == "__main__":
         app.run()
         sys.exit(0)
     else:
+        from tray_manager import allocate_console
+        allocate_console()
+        
         # Check single instance before showing interactive Control Panel
         from single_instance import check_single_instance
         if not check_single_instance():

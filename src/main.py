@@ -12,7 +12,7 @@ from llm_normalizer import LLMNormalizer
 from typer import Typer
 from hotkey_manager import SystemHotkeyManager
 from single_instance import check_single_instance, release_single_instance
-from tray_manager import SystemTrayManager, hide_console, show_console
+from tray_manager import SystemTrayManager, free_console, allocate_console
 
 class WinVoiceApp:
     def __init__(self, is_silent=False):
@@ -39,7 +39,7 @@ class WinVoiceApp:
         icon_path = get_resource_path(os.path.join("icons", "icon.ico"))
         self.tray = SystemTrayManager(
             icon_path=icon_path,
-            tooltip=f"Shockwave v{getattr(config, 'APP_VERSION', '0.9.2')}",
+            tooltip=f"Shockwave v{getattr(config, 'APP_VERSION', '0.9.3')}",
             on_quit=self.quit_app
         )
         self.tray.start()
@@ -49,8 +49,8 @@ class WinVoiceApp:
         yellow_eye = "\033[38;2;255;215;0m\033[1mEye\033[0m"
         print(f"Shockwave started. Press {config.HOTKEY.upper()} or click the {yellow_eye} to record.")
         
-        # Hide console window to system tray
-        hide_console()
+        # Free console to detach Windows Terminal cleanly (leaving zero ghost icons)
+        free_console()
 
     def toggle_recording(self):
         with self.lock:

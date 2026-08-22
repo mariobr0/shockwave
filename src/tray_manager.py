@@ -98,19 +98,39 @@ def get_console_hwnd():
     except Exception:
         return 0
 
-def hide_console():
-    """Hides the console window from taskbar and desktop."""
+def allocate_console():
+    """Dynamically attaches or creates a console for user interaction."""
     hwnd = get_console_hwnd()
-    if hwnd:
-        user32.ShowWindow(hwnd, SW_HIDE)
-
-def show_console():
-    """Restores and brings the console window to the foreground."""
-    hwnd = get_console_hwnd()
+    if not hwnd:
+        ctypes.windll.kernel32.AllocConsole()
+        hwnd = get_console_hwnd()
+        try:
+            sys.stdout = open("CONOUT$", "w", encoding="utf-8")
+            sys.stderr = open("CONOUT$", "w", encoding="utf-8")
+            sys.stdin = open("CONIN$", "r", encoding="utf-8")
+        except Exception:
+            pass
     if hwnd:
         user32.ShowWindow(hwnd, SW_SHOW)
         user32.ShowWindow(hwnd, SW_RESTORE)
         user32.SetForegroundWindow(hwnd)
+    return hwnd
+
+def free_console():
+    """Detaches and completely closes the console window (no residual tray icon)."""
+    hwnd = get_console_hwnd()
+    if hwnd:
+        user32.ShowWindow(hwnd, SW_HIDE)
+        try:
+            ctypes.windll.kernel32.FreeConsole()
+        except Exception:
+            pass
+
+def hide_console():
+    free_console()
+
+def show_console():
+    allocate_console()
 
 def is_console_visible():
     """Checks if the console window is currently visible."""
@@ -120,11 +140,11 @@ def is_console_visible():
     return False
 
 def toggle_console():
-    """Toggles console window visibility."""
+    """Toggles console window visibility dynamically."""
     if is_console_visible():
-        hide_console()
+        free_console()
     else:
-        show_console()
+        allocate_console()
 
 class SystemTrayManager:
     """
