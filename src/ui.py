@@ -40,10 +40,18 @@ class WinVoiceUI:
         # Hide window immediately during setup to avoid top-left blank flash
         self.root.withdraw()
         
+        # Set window icon (used by Alt-Tab and title bar if visible)
+        icon_path = get_resource_path(os.path.join("icons", "icon.ico"))
+        if os.path.exists(icon_path):
+            try:
+                self.root.iconbitmap(icon_path)
+            except Exception:
+                pass
+        
         self.root.overrideredirect(True)
         self.root.attributes("-topmost", True)
         
-        # Prevent floating overlay from ever creating a button on the taskbar
+        # Prevent floating overlay from creating a button on the taskbar
         try:
             hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
             if not hwnd:
@@ -278,7 +286,7 @@ class WinVoiceUI:
             )
 
     def setup_taskbar_style(self):
-        """Applies WS_EX_APPWINDOW to ensure permanent taskbar presence."""
+        """Applies WS_EX_TOOLWINDOW to ensure the floating widget stays hidden from the taskbar."""
         try:
             self.root.update_idletasks()
             GWL_EXSTYLE = -20
@@ -290,10 +298,10 @@ class WinVoiceUI:
                 hwnd = self.root.winfo_id()
                 
             style = ctypes.windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
-            style = (style & ~WS_EX_TOOLWINDOW) | WS_EX_APPWINDOW
+            style = (style | WS_EX_TOOLWINDOW) & ~WS_EX_APPWINDOW
             ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style)
-        except Exception as e:
-            print(f"Taskbar style notice: {e}")
+        except Exception:
+            pass
 
     def show_window(self):
         """Displays the ready widget and plays startup quote if alert sound is enabled."""
