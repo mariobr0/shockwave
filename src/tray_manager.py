@@ -1,6 +1,7 @@
 import ctypes
 from ctypes import wintypes
 import threading
+import os
 import sys
 
 def get_resource_path(relative_path):
@@ -48,6 +49,14 @@ ID_SHOW_CONSOLE = 1001
 ID_HIDE_CONSOLE = 1002
 ID_QUIT = 1003
 
+# 64-bit safe LRESULT & WNDPROC types
+LRESULT = ctypes.c_ssize_t
+WNDPROC = ctypes.WINFUNCTYPE(LRESULT, wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM)
+
+user32 = ctypes.windll.user32
+user32.DefWindowProcW.argtypes = [wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
+user32.DefWindowProcW.restype = LRESULT
+
 # Win32 Structure for Tray Icon
 class NOTIFYICONDATAW(ctypes.Structure):
     _fields_ = [
@@ -67,8 +76,6 @@ class NOTIFYICONDATAW(ctypes.Structure):
         ("guidItem", ctypes.c_byte * 16),
         ("hBalloonIcon", wintypes.HICON),
     ]
-
-WNDPROC = ctypes.WINFUNCTYPE(ctypes.c_long, wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM)
 
 class WNDCLASSW(ctypes.Structure):
     _fields_ = [
@@ -95,21 +102,21 @@ def hide_console():
     """Hides the console window from taskbar and desktop."""
     hwnd = get_console_hwnd()
     if hwnd:
-        ctypes.windll.user32.ShowWindow(hwnd, SW_HIDE)
+        user32.ShowWindow(hwnd, SW_HIDE)
 
 def show_console():
     """Restores and brings the console window to the foreground."""
     hwnd = get_console_hwnd()
     if hwnd:
-        ctypes.windll.user32.ShowWindow(hwnd, SW_SHOW)
-        ctypes.windll.user32.ShowWindow(hwnd, SW_RESTORE)
-        ctypes.windll.user32.SetForegroundWindow(hwnd)
+        user32.ShowWindow(hwnd, SW_SHOW)
+        user32.ShowWindow(hwnd, SW_RESTORE)
+        user32.SetForegroundWindow(hwnd)
 
 def is_console_visible():
     """Checks if the console window is currently visible."""
     hwnd = get_console_hwnd()
     if hwnd:
-        return bool(ctypes.windll.user32.IsWindowVisible(hwnd))
+        return bool(user32.IsWindowVisible(hwnd))
     return False
 
 def toggle_console():
@@ -124,7 +131,7 @@ class SystemTrayManager:
     Lightweight Win32 System Tray Icon manager using native ctypes.
     Runs a message pump in a background thread.
     """
-    def __init__(self, icon_path=None, tooltip="Shockwave v0.9.2", on_quit=None):
+    def __init__(self, icon_path=None, tooltip="Shockwave v0.9.3", on_quit=None):
         self.icon_path = icon_path
         self.tooltip = tooltip
         self.on_quit = on_quit
@@ -139,7 +146,7 @@ class SystemTrayManager:
     def _load_icon(self):
         if self.icon_path and os.path.exists(self.icon_path):
             try:
-                self.hicon = ctypes.windll.user32.LoadImageW(
+                self.hicon = user32.LoadImageW(
                     None,
                     self.icon_path,
                     IMAGE_ICON,
@@ -151,11 +158,10 @@ class SystemTrayManager:
                 
         if not self.hicon:
             # Fallback to system default application icon
-            self.hicon = ctypes.windll.user32.LoadIconW(0, 32512)
+            self.hicon = user32.LoadIconW(0, 32512)
 
     def _show_context_menu(self):
-        hmenu = ctypes.windll.user32.CreatePopupMenu()
-        user32 = ctypes.windll.user32
+        hmenu = user32.CreatePopupMenu()
         
         # Menu options
         user32.AppendMenuW(hmenu, MF_STRING, ID_SHOW_CONSOLE, "Показать панель управления")
@@ -197,12 +203,11 @@ class SystemTrayManager:
                 self._show_context_menu()
                 return 0
         elif msg == WM_DESTROY:
-            ctypes.windll.user32.PostQuitMessage(0)
+            user32.PostQuitMessage(0)
             return 0
-        return ctypes.windll.user32.DefWindowProcW(hwnd, msg, wparam, lparam)
+        return user32.DefWindowProcW(hwnd, msg, wparam, lparam)
 
     def _run_message_loop(self):
-        user32 = ctypes.windll.user32
         kernel32 = ctypes.windll.kernel32
         
         class_name = f"ShockwaveTrayClass_{os.getpid()}"
@@ -257,6 +262,6 @@ class SystemTrayManager:
                 pass
         if self.hwnd:
             try:
-                ctypes.windll.user32.PostMessageW(self.hwnd, WM_DESTROY, 0, 0)
+                user32.PostMessageW(self.hwnd, WM_DESTROY, 0, 0)
             except Exception:
                 pass
