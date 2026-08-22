@@ -1,8 +1,16 @@
 import ctypes
 from ctypes import wintypes
 import threading
-import os
 import sys
+
+def get_resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    candidate = os.path.join(root_path, relative_path)
+    if os.path.exists(candidate):
+        return candidate
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), relative_path)
 
 # Win32 Constants
 NIM_ADD = 0x00000000

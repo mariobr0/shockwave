@@ -6,13 +6,13 @@ import os
 
 import config
 
-from ui import WinVoiceUI
+from ui import WinVoiceUI, get_resource_path
 from audio_engine import AudioEngine
 from llm_normalizer import LLMNormalizer
 from typer import Typer
 from hotkey_manager import SystemHotkeyManager
 from single_instance import check_single_instance, release_single_instance
-from tray_manager import SystemTrayManager, get_resource_path, hide_console, show_console
+from tray_manager import SystemTrayManager, hide_console, show_console
 
 class WinVoiceApp:
     def __init__(self, is_silent=False):
