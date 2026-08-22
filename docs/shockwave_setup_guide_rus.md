@@ -7,7 +7,7 @@
 *Этот вариант подходит для большинства пользователей. Python и дополнительные программы устанавливать не требуется.*
 
 1. **Скачайте готовый архив:**  
-   Перейдите на страницу **[GitHub Releases](https://github.com/mariobr0/shockwave/releases)** и скачайте **`Shockwave-v0.9.2-Portable.zip`**.
+   Перейдите на страницу **[GitHub Releases](https://github.com/mariobr0/shockwave/releases)** и скачайте **`Shockwave-v0.9.3-Portable.zip`**.
 2. **Распакуйте архив** в любую удобную папку (например, `C:\Shockwave`).
 3. **Запустите `Shockwave.exe`**:
    * Нажмите **`4`** (`Скачать/Проверить модели`), чтобы скачать модель Whisper или GigaAM в локальную папку `models/`.

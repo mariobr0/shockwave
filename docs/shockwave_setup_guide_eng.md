@@ -7,7 +7,7 @@
 *Recommended for most users. No Python or additional software installation needed.*
 
 1. **Download the prebuilt archive:**  
-   Go to the **[GitHub Releases](https://github.com/mariobr0/shockwave/releases)** page and download **`Shockwave-v0.9.2-Portable.zip`**.
+   Go to the **[GitHub Releases](https://github.com/mariobr0/shockwave/releases)** page and download **`Shockwave-v0.9.3-Portable.zip`**.
 2. **Extract the archive** to any folder (e.g., `C:\Shockwave`).
 3. **Run `Shockwave.exe`**:
    * Press **`4`** (`Download / Verify STT Models`) to let the app download Whisper or GigaAM models into the local `models/` folder.
