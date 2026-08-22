@@ -166,6 +166,16 @@ def hide_console():
     """Hides the top-level console window from desktop and removes its button from the taskbar."""
     hwnd = get_root_console_hwnd()
     if hwnd:
+        # Apply WS_EX_TOOLWINDOW to forcibly remove from taskbar (works on Windows Terminal)
+        GWL_EXSTYLE = -20
+        WS_EX_TOOLWINDOW = 0x00000080
+        WS_EX_APPWINDOW = 0x00040000
+        try:
+            style = user32.GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
+            style = (style | WS_EX_TOOLWINDOW) & ~WS_EX_APPWINDOW
+            user32.SetWindowLongPtrW(hwnd, GWL_EXSTYLE, style)
+        except Exception:
+            pass
         user32.ShowWindow(hwnd, SW_HIDE)
         delete_taskbar_tab(hwnd)
 
@@ -173,6 +183,16 @@ def show_console():
     """Restores and brings the top-level console window to the foreground with full history intact."""
     hwnd = get_root_console_hwnd()
     if hwnd:
+        # Restore WS_EX_APPWINDOW so the window reappears on the taskbar normally
+        GWL_EXSTYLE = -20
+        WS_EX_TOOLWINDOW = 0x00000080
+        WS_EX_APPWINDOW = 0x00040000
+        try:
+            style = user32.GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
+            style = (style & ~WS_EX_TOOLWINDOW) | WS_EX_APPWINDOW
+            user32.SetWindowLongPtrW(hwnd, GWL_EXSTYLE, style)
+        except Exception:
+            pass
         add_taskbar_tab(hwnd)
         user32.ShowWindow(hwnd, SW_SHOW)
         user32.ShowWindow(hwnd, SW_RESTORE)
