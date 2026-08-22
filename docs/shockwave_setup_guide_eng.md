@@ -9,12 +9,11 @@
 1. **Download the prebuilt archive:**  
    Go to the **[GitHub Releases](https://github.com/mariobr0/shockwave/releases)** page and download **`Shockwave-v0.9.2-Portable.zip`**.
 2. **Extract the archive** to any folder (e.g., `C:\Shockwave`).
-3. **Run `Shockwave.exe`**.
-4. In the Control Panel:
-   * Press **`4`** (`Download / Verify STT Models`) to let the application download the Whisper and/or GigaAM speech models into the local `models/` folder.
+3. **Run `Shockwave.exe`**:
+   * Press **`4`** (`Download / Verify STT Models`) to let the app download Whisper or GigaAM models into the local `models/` folder.
    * Press **`2`** (`Configure API Key & LLM`) if you wish to enable smart punctuation and formatting via an LLM.
-5. Press **`1. Start Shockwave`** — a purple floating widget will appear in the corner of your screen.
-6. Press **`Ctrl + Space`** in any application to start recording, and press it again to finish. Dictate your speech and paste the result (`Ctrl + V`).
+4. Press **`1. Start Shockwave`** — the control panel will minimize to the Windows system tray (near clock), and the purple floating widget will appear.
+5. Press **`Ctrl + Space`** in any application to start recording, and press it again to finish. Dictate your speech and paste the result (`Ctrl + V`).
 
 ---
 
@@ -38,7 +37,9 @@ pip install -r requirements.txt
 ```
 
 ### 3. Build `.exe` or Run Directly
-* **Build standalone binary:** run **`build.bat`** (generates `dist\Shockwave.exe` and shortcut `Shockwave.lnk`).
+* **Build standalone binary:** run **`build.bat`**. The build script generates `dist\Shockwave.exe` and two desktop shortcuts:
+  1. **`Shockwave.lnk`** — Control Panel with auto-minimization to system tray.
+  2. **`Shockwave (Виджет).lnk`** — Direct silent launch of the floating widget.
 * **Direct Python launch:** run **`start.bat`**.
 
 ---
@@ -60,6 +61,8 @@ Parameters can be configured in `.env` (template available in `.env.example`):
 * `HOTKEY=ctrl+space` — global system hotkey.
 * `WHISPER_LANGUAGE=ru` — Whisper recognition language (`ru`, `auto` for 99 languages, `en`, `de`, etc.).
 * `UI_POSITION=bottom-left` — initial widget position (`bottom-left`, `bottom-right`, `top-center`).
+* `UI_OPACITY=0.80` — widget opacity (`0.1` to `1.0`).
+* `ALERT_SOUND=true` — sound chimes and startup Megatron quote (`true` or `false`).
 
 #### Recommended Hotkeys:
 * ✅ **Recommended:** `ctrl+space`, `alt+space`, `f9`, `f8`, `f10`, `pause`.
@@ -67,10 +70,12 @@ Parameters can be configured in `.env` (template available in `.env.example`):
 
 ---
 
-## 🖱️ Widget Controls
+## 🖱️ Widget Controls & System Tray
 
 * **Left grip handle (`⋮⋮`):** Click and drag with mouse to reposition the widget anywhere on your desktop.
 * **Shockwave Eye (🟡):** Clickable recording button with visual state indication (glows solid yellow during recording).
 * **`LLM norm` checkbox:** Toggle AI-based text punctuation and formatting.
-* **`alert` checkbox:** Toggle audio chime notification on transcription completion.
+* **`alert` checkbox:** Toggle audio chime notification and startup voice clip.
+* **System Tray Icon (near clock):** Double-click to show/hide the console; right-click for quick control menu.
+* **Single Instance Protection:** Duplicate launches are automatically prevented without wasting resources.
 * **`×` button:** Exit application.

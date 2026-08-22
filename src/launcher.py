@@ -184,11 +184,13 @@ def menu():
             
             if lang == "ru":
                 print(f"\nЗапуск Shockwave ({stt_display})...")
+                print("Панель управления сворачивается в системный трей (возле часов).")
             else:
                 print(f"\nStarting Shockwave ({stt_display})...")
+                print("Control panel minimizing to system tray (next to clock).")
                 
             import main
-            app = main.WinVoiceApp()
+            app = main.WinVoiceApp(is_silent=False)
             app.run()
             sys.exit(0)
             
@@ -287,4 +289,26 @@ def setup_stt(lang="en"):
         input("\nPress Enter to return...")
 
 if __name__ == "__main__":
-    menu()
+    # Direct silent widget launch via --widget / --silent argument
+    if "--widget" in sys.argv or "--silent" in sys.argv:
+        from tray_manager import hide_console
+        hide_console()
+        
+        from single_instance import check_single_instance
+        if not check_single_instance():
+            sys.exit(0)
+            
+        import main
+        app = main.WinVoiceApp(is_silent=True)
+        app.run()
+        sys.exit(0)
+    else:
+        # Check single instance before showing interactive Control Panel
+        from single_instance import check_single_instance
+        if not check_single_instance():
+            print("\n[Shockwave] Программа уже запущена! / Shockwave is already running!\n")
+            import time
+            time.sleep(2.0)
+            sys.exit(0)
+            
+        menu()
