@@ -15,7 +15,7 @@ python -m PyInstaller --name Shockwave --onefile --console --icon=icons\icon.ico
 
 echo.
 if exist "dist\Shockwave.exe" (
-    powershell -NoProfile -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%~dp0Shockwave.lnk'); $s.TargetPath = '%~dp0dist\Shockwave.exe'; $s.WorkingDirectory = '%~dp0'; $s.IconLocation = '%~dp0icons\icon.ico,0'; $s.Save(); $s2 = $ws.CreateShortcut('%~dp0Shockwave-Widget.lnk'); $s2.TargetPath = '%~dp0dist\Shockwave.exe'; $s2.Arguments = '--widget'; $s2.WorkingDirectory = '%~dp0'; $s2.IconLocation = '%~dp0icons\icon.ico,0'; $s2.Save()"
+    python make_shortcuts.py
     echo =======================================================================
     echo SUCCESS: Build completed! Two shortcuts are ready in the root:
     echo  - Shockwave.lnk        : Control Panel with system tray minimization
