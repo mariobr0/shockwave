@@ -6,15 +6,20 @@ ERROR_ALREADY_EXISTS = 183
 
 _mutex_handle = None
 
-def check_single_instance(mutex_name="Local\\Shockwave_App_Mutex_v092"):
+def check_single_instance(mutex_name="Local\\Shockwave_App_Mutex_v093"):
     """
     Ensures only one instance of Shockwave runs at any given time
     using a native Windows Named Mutex.
     
     Returns:
-        bool: True if this is the only running instance, False if a duplicate was detected.
+        bool: True if this is the only running instance (or already acquired by this process),
+              False if a duplicate running process was detected.
     """
     global _mutex_handle
+    
+    # If the current process has already acquired the mutex, allow continuation
+    if _mutex_handle is not None:
+        return True
     
     try:
         kernel32 = ctypes.windll.kernel32
@@ -23,6 +28,7 @@ def check_single_instance(mutex_name="Local\\Shockwave_App_Mutex_v092"):
         last_error = kernel32.GetLastError()
         
         if last_error == ERROR_ALREADY_EXISTS:
+            _mutex_handle = None
             return False
         return True
     except Exception as e:
@@ -32,7 +38,7 @@ def check_single_instance(mutex_name="Local\\Shockwave_App_Mutex_v092"):
 def release_single_instance():
     """Releases the mutex handle upon application termination."""
     global _mutex_handle
-    if _mutex_handle:
+    if _mutex_handle is not None:
         try:
             ctypes.windll.kernel32.CloseHandle(_mutex_handle)
         except Exception:
