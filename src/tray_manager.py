@@ -38,6 +38,8 @@ SW_HIDE = 0
 SW_SHOW = 5
 SW_RESTORE = 9
 
+GA_ROOT = 2
+
 TPM_RIGHTBUTTON = 0x0002
 TPM_NONOTIFY = 0x0080
 TPM_RETURNCMD = 0x0100
@@ -56,6 +58,8 @@ WNDPROC = ctypes.WINFUNCTYPE(LRESULT, wintypes.HWND, wintypes.UINT, wintypes.WPA
 user32 = ctypes.windll.user32
 user32.DefWindowProcW.argtypes = [wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
 user32.DefWindowProcW.restype = LRESULT
+user32.GetAncestor.argtypes = [wintypes.HWND, wintypes.UINT]
+user32.GetAncestor.restype = wintypes.HWND
 
 # Win32 Structure for Tray Icon
 class NOTIFYICONDATAW(ctypes.Structure):
@@ -91,60 +95,44 @@ class WNDCLASSW(ctypes.Structure):
         ("lpszClassName", wintypes.LPCWSTR),
     ]
 
-def get_console_hwnd():
-    """Returns the HWND of the current console window, if any."""
+def get_root_console_hwnd():
+    """Returns the top-level root window for the console (Windows Terminal or ConHost)."""
     try:
-        return ctypes.windll.kernel32.GetConsoleWindow()
+        hwnd = ctypes.windll.kernel32.GetConsoleWindow()
+        if not hwnd:
+            return 0
+        root = user32.GetAncestor(hwnd, GA_ROOT)
+        return root if root else hwnd
     except Exception:
         return 0
 
-def allocate_console():
-    """Dynamically attaches or creates a console for user interaction."""
-    hwnd = get_console_hwnd()
-    if not hwnd:
-        ctypes.windll.kernel32.AllocConsole()
-        hwnd = get_console_hwnd()
-        try:
-            sys.stdout = open("CONOUT$", "w", encoding="utf-8")
-            sys.stderr = open("CONOUT$", "w", encoding="utf-8")
-            sys.stdin = open("CONIN$", "r", encoding="utf-8")
-        except Exception:
-            pass
+def hide_console():
+    """Hides the top-level console window from desktop and taskbar."""
+    hwnd = get_root_console_hwnd()
+    if hwnd:
+        user32.ShowWindow(hwnd, SW_HIDE)
+
+def show_console():
+    """Restores and brings the top-level console window to the foreground with full history intact."""
+    hwnd = get_root_console_hwnd()
     if hwnd:
         user32.ShowWindow(hwnd, SW_SHOW)
         user32.ShowWindow(hwnd, SW_RESTORE)
         user32.SetForegroundWindow(hwnd)
-    return hwnd
-
-def free_console():
-    """Detaches and completely closes the console window (no residual tray icon)."""
-    hwnd = get_console_hwnd()
-    if hwnd:
-        user32.ShowWindow(hwnd, SW_HIDE)
-        try:
-            ctypes.windll.kernel32.FreeConsole()
-        except Exception:
-            pass
-
-def hide_console():
-    free_console()
-
-def show_console():
-    allocate_console()
 
 def is_console_visible():
     """Checks if the console window is currently visible."""
-    hwnd = get_console_hwnd()
+    hwnd = get_root_console_hwnd()
     if hwnd:
         return bool(user32.IsWindowVisible(hwnd))
     return False
 
 def toggle_console():
-    """Toggles console window visibility dynamically."""
+    """Toggles console window visibility."""
     if is_console_visible():
-        free_console()
+        hide_console()
     else:
-        allocate_console()
+        show_console()
 
 class SystemTrayManager:
     """
