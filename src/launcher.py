@@ -95,19 +95,29 @@ def print_banner():
         try:
             with open(ansi_path, "r", encoding="utf-8") as f:
                 lines = f.read().split("\n")
-                pad = "   "
+                try:
+                    banner_pad_n = int(read_env("CLI_BANNER_PAD", "3"))
+                except Exception:
+                    banner_pad_n = 3
+                pad = " " * max(0, banner_pad_n)
                 for line in lines:
                     if line.strip():
                         print(pad + line)
         except Exception:
             pass
             
-    # Iconic tagline with configurable color from .env (default: #514757)
+    # Iconic tagline with configurable color and padding from .env
+    try:
+        quote_pad_n = int(read_env("CLI_QUOTE_PAD", "6"))
+    except Exception:
+        quote_pad_n = 6
+    q_pad = " " * max(0, quote_pad_n)
+    
     quote_hex = read_env("CLI_QUOTE_COLOR", "#514757")
     qr, qg, qb = hex_to_rgb(quote_hex, (81, 71, 87))
     tagline = "WHAT IS YOUR COMMAND, MEGATRON?"
     custom_quote = f"\033[1;3;38;2;{qr};{qg};{qb}m{tagline}\033[0m"
-    print(f"      {custom_quote}\n")
+    print(f"{q_pad}{custom_quote}\n")
 
 def menu():
     ensure_env_exists()
@@ -140,10 +150,16 @@ def menu():
         llm_key = read_env("LLM_API_KEY", "")
         version = getattr(config, "APP_VERSION", "0.9.3")
         
+        try:
+            title_pad_n = int(read_env("CLI_TITLE_PAD", "4"))
+        except Exception:
+            title_pad_n = 4
+        t_pad = " " * max(0, title_pad_n)
+        
         if lang == "ru":
             endpoint_display = llm_endpoint if llm_endpoint else "НЕ УСТАНОВЛЕН"
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "НЕ УСТАНОВЛЕН")
-            print(f"    {PURPLE}{BOLD}SHOCKWAVE v{version} — ПАНЕЛЬ УПРАВЛЕНИЯ{RESET}\n")
+            print(f"{t_pad}{PURPLE}{BOLD}SHOCKWAVE v{version} — ПАНЕЛЬ УПРАВЛЕНИЯ{RESET}\n")
             print("Текущие настройки:")
             print(f"- STT Движок:   {stt_display}")
             print(f"- LLM Эндпоинт: {endpoint_display}")
@@ -159,7 +175,7 @@ def menu():
         else:
             endpoint_display = llm_endpoint if llm_endpoint else "NOT SET"
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "NOT SET")
-            print(f"     {PURPLE}{BOLD}SHOCKWAVE v{version} — CONTROL PANEL{RESET}\n")
+            print(f"{t_pad}{PURPLE}{BOLD}SHOCKWAVE v{version} — CONTROL PANEL{RESET}\n")
             print("Current Settings:")
             print(f"- STT Engine:   {stt_display}")
             print(f"- LLM Endpoint: {endpoint_display}")

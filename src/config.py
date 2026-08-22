@@ -54,6 +54,22 @@ CLI_TITLE_COLOR = os.getenv("CLI_TITLE_COLOR", "#B45FEB")
 UI_BG_COLOR = os.getenv("UI_BG_COLOR", "#3b274d")
 UI_GRIP_COLOR = os.getenv("UI_GRIP_COLOR", "#2c1c3b")
 
+# CLI Alignment & Left Margins (Number of spaces)
+try:
+    CLI_BANNER_PAD = int(os.getenv("CLI_BANNER_PAD", "3"))
+except (ValueError, TypeError):
+    CLI_BANNER_PAD = 3
+
+try:
+    CLI_QUOTE_PAD = int(os.getenv("CLI_QUOTE_PAD", "6"))
+except (ValueError, TypeError):
+    CLI_QUOTE_PAD = 6
+
+try:
+    CLI_TITLE_PAD = int(os.getenv("CLI_TITLE_PAD", "4"))
+except (ValueError, TypeError):
+    CLI_TITLE_PAD = 4
+
 AUDIO_TEMP_FILE = "temp_audio.wav"
 
 # System prompt for transcript normalization and punctuation restoration
