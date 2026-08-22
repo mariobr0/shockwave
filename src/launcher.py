@@ -77,6 +77,15 @@ def update_env(key, value):
     except Exception:
         pass
 
+def hex_to_rgb(hex_str, default_rgb):
+    try:
+        h = str(hex_str).strip().lstrip("#")
+        if len(h) == 6:
+            return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+    except Exception:
+        pass
+    return default_rgb
+
 def clear_screen():
     os.system("cls" if os.name == "nt" else "clear")
 
@@ -93,16 +102,20 @@ def print_banner():
         except Exception:
             pass
             
-    # Iconic tagline in elegant slate purple (#514757 -> RGB: 81, 71, 87)
+    # Iconic tagline with configurable color from .env (default: #514757)
+    quote_hex = read_env("CLI_QUOTE_COLOR", "#514757")
+    qr, qg, qb = hex_to_rgb(quote_hex, (81, 71, 87))
     tagline = "WHAT IS YOUR COMMAND, MEGATRON?"
-    custom_quote = "\033[1;3;38;2;81;71;87m" + tagline + "\033[0m"
+    custom_quote = f"\033[1;3;38;2;{qr};{qg};{qb}m{tagline}\033[0m"
     print(f"      {custom_quote}\n")
 
 def menu():
     ensure_env_exists()
     
-    # ANSI color codes
-    PURPLE = "\033[38;2;180;95;235m"
+    # Dynamic title color from .env (default: #B45FEB)
+    title_hex = read_env("CLI_TITLE_COLOR", "#B45FEB")
+    tr, tg, tb = hex_to_rgb(title_hex, (180, 95, 235))
+    PURPLE = f"\033[38;2;{tr};{tg};{tb}m"
     RESET = "\033[0m"
     BOLD = "\033[1m"
     

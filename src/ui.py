@@ -55,9 +55,9 @@ class WinVoiceUI:
         opacity = getattr(config, "UI_OPACITY", 0.80)
         self.root.attributes("-alpha", opacity)
         
-        # Shockwave deep royal purple palette #3b274d
-        self.COLOR_BG = "#3b274d"
-        self.COLOR_GRIP = "#2c1c3b"
+        # Shockwave deep royal purple palette (configurable via .env)
+        self.COLOR_BG = getattr(config, "UI_BG_COLOR", "#3b274d")
+        self.COLOR_GRIP = getattr(config, "UI_GRIP_COLOR", "#2c1c3b")
         self.COLOR_GRIP_HOVER = "#4c3363"
         self.COLOR_TEXT = "#ffffff"
         self.COLOR_MUTED = "#c4b0d9"

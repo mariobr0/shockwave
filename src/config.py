@@ -48,6 +48,12 @@ try:
 except (ValueError, TypeError):
     UI_OPACITY = 0.80
 
+# Theme & Palette Customization (HEX Colors)
+CLI_QUOTE_COLOR = os.getenv("CLI_QUOTE_COLOR", "#514757")
+CLI_TITLE_COLOR = os.getenv("CLI_TITLE_COLOR", "#B45FEB")
+UI_BG_COLOR = os.getenv("UI_BG_COLOR", "#3b274d")
+UI_GRIP_COLOR = os.getenv("UI_GRIP_COLOR", "#2c1c3b")
+
 AUDIO_TEMP_FILE = "temp_audio.wav"
 
 # System prompt for transcript normalization and punctuation restoration
