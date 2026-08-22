@@ -15,13 +15,13 @@ python -m PyInstaller --name Shockwave --onefile --console --icon=icons\icon.ico
 
 echo.
 if exist "dist\Shockwave.exe" (
-    powershell -NoProfile -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%~dp0Shockwave.lnk'); $s.TargetPath = '%~dp0dist\Shockwave.exe'; $s.WorkingDirectory = '%~dp0'; $s.IconLocation = '%~dp0icons\icon.ico,0'; $s.Save(); $s2 = $ws.CreateShortcut('%~dp0Shockwave (Виджет).lnk'); $s2.TargetPath = '%~dp0dist\Shockwave.exe'; $s2.Arguments = '--widget'; $s2.WorkingDirectory = '%~dp0'; $s2.IconLocation = '%~dp0icons\icon.ico,0'; $s2.Save()"
+    powershell -NoProfile -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%~dp0Shockwave.lnk'); $s.TargetPath = '%~dp0dist\Shockwave.exe'; $s.WorkingDirectory = '%~dp0'; $s.IconLocation = '%~dp0icons\icon.ico,0'; $s.Save(); $s2 = $ws.CreateShortcut('%~dp0Shockwave-Widget.lnk'); $s2.TargetPath = '%~dp0dist\Shockwave.exe'; $s2.Arguments = '--widget'; $s2.WorkingDirectory = '%~dp0'; $s2.IconLocation = '%~dp0icons\icon.ico,0'; $s2.Save()"
     echo =======================================================================
-    echo DONE! Two shortcuts are ready in the root:
-    echo  1. Shockwave.lnk           - Control Panel (minimizes to tray)
-    echo  2. Shockwave (Виджет).lnk - Direct silent launch (widget only)
+    echo SUCCESS: Build completed! Two shortcuts are ready in the root:
+    echo  - Shockwave.lnk        : Control Panel with system tray minimization
+    echo  - Shockwave-Widget.lnk : Direct silent launch of the floating widget
     echo =======================================================================
 ) else (
-    echo Build failed. Please check the logs above.
+    echo ERROR: Build failed. Please check the logs above.
 )
 pause
