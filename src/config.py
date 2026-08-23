@@ -70,11 +70,6 @@ try:
 except (ValueError, TypeError):
     CLI_TITLE_PAD = 14
 
-try:
-    CLI_CP_PAD = int(os.getenv("CLI_CP_PAD", "16"))
-except (ValueError, TypeError):
-    CLI_CP_PAD = 16
-
 AUDIO_TEMP_FILE = "temp_audio.wav"
 
 # System prompt for transcript normalization and punctuation restoration

@@ -155,18 +155,11 @@ def menu():
         except Exception:
             title_pad_n = 14
         t_pad = " " * max(0, title_pad_n)
-
-        try:
-            cp_pad_n = int(read_env("CLI_CP_PAD", "16"))
-        except Exception:
-            cp_pad_n = 16
-        cp_pad = " " * max(0, cp_pad_n)
         
         if lang == "ru":
             endpoint_display = llm_endpoint if llm_endpoint else "НЕ УСТАНОВЛЕН"
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "НЕ УСТАНОВЛЕН")
-            print(f"{t_pad}{PURPLE}{BOLD}SHOCKWAVE v{version}{RESET}")
-            print(f"{cp_pad}{PURPLE}{BOLD}ПАНЕЛЬ УПРАВЛЕНИЯ{RESET}\n")
+            print(f"{t_pad}{PURPLE}{BOLD}SHOCKWAVE v{version}{RESET}\n")
             print("Текущие настройки:")
             print(f"- STT Движок:   {stt_display}")
             print(f"- LLM Эндпоинт: {endpoint_display}")
@@ -182,8 +175,7 @@ def menu():
         else:
             endpoint_display = llm_endpoint if llm_endpoint else "NOT SET"
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "NOT SET")
-            print(f"{t_pad}{PURPLE}{BOLD}SHOCKWAVE v{version}{RESET}")
-            print(f"{cp_pad}{PURPLE}{BOLD}CONTROL PANEL{RESET}\n")
+            print(f"{t_pad}{PURPLE}{BOLD}SHOCKWAVE v{version}{RESET}\n")
             print("Current Settings:")
             print(f"- STT Engine:   {stt_display}")
             print(f"- LLM Endpoint: {endpoint_display}")
