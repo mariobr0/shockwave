@@ -87,21 +87,6 @@ class WinVoiceUI:
         
         self.root.configure(bg=self.COLOR_BG)
         
-        # --- 1. Left Grip / Drag Handle ---
-        self.grip = tk.Frame(self.root, bg=self.COLOR_GRIP, width=16, cursor="fleur")
-        self.grip.pack(side="left", fill="y")
-        self.grip.pack_propagate(False)
-        
-        self.grip_label = tk.Label(
-            self.grip,
-            text="⋮\n⋮",
-            bg=self.COLOR_GRIP,
-            fg=self.COLOR_MUTED,
-            font=("Segoe UI", 8, "bold"),
-            cursor="fleur"
-        )
-        self.grip_label.pack(expand=True)
-        
         # Dragging handlers (allows grabbing anywhere on the widget bar)
         self._drag_offset_x = 0
         self._drag_offset_y = 0
@@ -115,17 +100,11 @@ class WinVoiceUI:
             y = event.y_root - self._drag_offset_y
             self.root.geometry(f"+{x}+{y}")
             
-        for widget in (self.grip, self.grip_label):
-            widget.bind("<Button-1>", start_drag)
-            widget.bind("<B1-Motion>", do_drag)
-            widget.bind("<Enter>", lambda e: (self.grip.config(bg=self.COLOR_GRIP_HOVER), self.grip_label.config(bg=self.COLOR_GRIP_HOVER, fg="#ffffff")))
-            widget.bind("<Leave>", lambda e: (self.grip.config(bg=self.COLOR_GRIP), self.grip_label.config(bg=self.COLOR_GRIP, fg=self.COLOR_MUTED)))
-            
         self.make_draggable = lambda w: (w.bind("<Button-1>", start_drag, add="+"), w.bind("<B1-Motion>", do_drag, add="+"))
             
-        # --- 2. Fixed Shockwave Eye Column (32px diameter) ---
+        # --- 1. Fixed Shockwave Eye Column (32px diameter) ---
         self.eye_frame = tk.Frame(self.root, bg=self.COLOR_BG, width=44)
-        self.eye_frame.pack(side="left", fill="y", padx=(6, 2))
+        self.eye_frame.pack(side="left", fill="y", padx=(8, 2))
         self.eye_frame.pack_propagate(False)
         
         self.eye_canvas = tk.Canvas(
@@ -280,7 +259,7 @@ class WinVoiceUI:
             
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        width = 250
+        width = 234
         height = 62
         
         if position == "bottom-right":
