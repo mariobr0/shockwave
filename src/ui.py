@@ -32,9 +32,10 @@ def play_startup_sound():
             print(f"Startup audio error: {e}")
 
 class WinVoiceUI:
-    def __init__(self, message_queue, position="bottom-left", on_trigger=None):
+    def __init__(self, message_queue, position="bottom-left", on_trigger=None, on_cancel=None):
         self.queue = message_queue
         self.on_trigger = on_trigger
+        self.on_cancel = on_cancel
         self.root = tk.Tk()
         
         # Hide window immediately during setup to avoid top-left blank flash
@@ -174,16 +175,46 @@ class WinVoiceUI:
         self.right_frame = tk.Frame(self.root, bg=self.COLOR_BG)
         self.right_frame.pack(side="left", fill="both", expand=True, padx=(2, 6), pady=4)
         
+        # Header row: Status label + Cancel button
+        self.header_frame = tk.Frame(self.right_frame, bg=self.COLOR_BG)
+        self.header_frame.pack(fill="x", pady=(2, 2))
+
         self.idle_text = "what is your command?"
         self.label = tk.Label(
-            self.right_frame,
+            self.header_frame,
             text=self.idle_text,
             bg=self.COLOR_BG,
             fg=self.COLOR_TEXT,
             font=("Segoe UI", 9),
             anchor="w"
         )
-        self.label.pack(fill="x", pady=(2, 2))
+        self.label.pack(side="left")
+
+        # Cancel button (visible only during recording)
+        self.cancel_btn = tk.Label(
+            self.header_frame,
+            text="cancel",
+            bg=self.COLOR_BG,
+            fg="#FFD700",
+            font=("Segoe UI", 9, "italic underline"),
+            cursor="hand2"
+        )
+
+        def on_cancel_click(event=None):
+            if self.on_cancel:
+                self.on_cancel()
+            else:
+                self.reset_to_idle()
+
+        def on_cancel_enter(event=None):
+            self.cancel_btn.config(fg="#FFF59D")
+
+        def on_cancel_leave(event=None):
+            self.cancel_btn.config(fg="#FFD700")
+
+        self.cancel_btn.bind("<Button-1>", on_cancel_click)
+        self.cancel_btn.bind("<Enter>", on_cancel_enter)
+        self.cancel_btn.bind("<Leave>", on_cancel_leave)
         
         # Checkbox controls container
         self.controls_frame = tk.Frame(self.right_frame, bg=self.COLOR_BG)
@@ -312,6 +343,7 @@ class WinVoiceUI:
 
     def reset_to_idle(self):
         self.label.config(text=self.idle_text)
+        self.cancel_btn.pack_forget()
         self.set_eye_active(False)
         self.reset_id = None
 
@@ -329,17 +361,21 @@ class WinVoiceUI:
                     txt = msg.get("text", "")
                     self.label.config(text=txt)
                     
-                    if txt in ["record", "processing", "normalization"]:
-                        # Glow solid yellow when active
+                    if txt == "record":
+                        self.cancel_btn.pack(side="left", padx=(10, 0))
+                        self.set_eye_active(True)
+                    elif txt in ["processing", "normalization"]:
+                        self.cancel_btn.pack_forget()
                         self.set_eye_active(True)
                     else:
-                        # Return to inactive state
+                        self.cancel_btn.pack_forget()
                         self.set_eye_active(False)
                     
                 elif cmd == "show_ready":
                     if self.reset_id:
                         self.root.after_cancel(self.reset_id)
                     self.label.config(text="ready")
+                    self.cancel_btn.pack_forget()
                     
                     # Becomes inactive on ready
                     self.set_eye_active(False)

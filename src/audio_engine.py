@@ -90,6 +90,19 @@ class AudioEngine:
             self.stream.close()
             self.stream = None
 
+    def cancel_recording(self):
+        """Immediately stops the stream and flushes all audio buffers without saving."""
+        self.is_recording = False
+        if self.stream:
+            try:
+                self.stream.stop()
+                self.stream.close()
+            except Exception:
+                pass
+            self.stream = None
+        self.audio_data = []
+        print("Recording cancelled and audio buffer discarded.")
+
     def transcribe(self) -> str:
         if not self.model:
             print("Error: No STT model loaded.")

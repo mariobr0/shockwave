@@ -32,8 +32,13 @@ class WinVoiceApp:
         self.is_processing = False
         self.lock = threading.Lock()
         
-        # Initialize UI with click-to-trigger handler
-        self.ui = WinVoiceUI(self.q, position=config.UI_POSITION, on_trigger=self.toggle_recording)
+        # Initialize UI with click-to-trigger handler and cancel handler
+        self.ui = WinVoiceUI(
+            self.q,
+            position=config.UI_POSITION,
+            on_trigger=self.toggle_recording,
+            on_cancel=self.cancel_recording
+        )
         
         # 2. System Tray Manager: Place Shockwave icon next to clock with toggle & exit menu
         icon_path = get_resource_path(os.path.join("icons", "icon.ico"))
@@ -51,6 +56,17 @@ class WinVoiceApp:
         
         # Hide console window to system tray smoothly
         hide_console()
+
+    def cancel_recording(self):
+        """Discards active recording immediately and resets UI state."""
+        with self.lock:
+            if not self.is_recording:
+                return
+            print("Cancelling recording upon user request...")
+            self.is_recording = False
+            self.is_processing = False
+            self.audio.cancel_recording()
+            self.q.put({"cmd": "show", "text": "what is your command?"})
 
     def toggle_recording(self):
         with self.lock:
