@@ -65,7 +65,7 @@ Detailed guides are available below:
 ---
 
 <p align="center">
-  <img src="docs/control_panel.png" alt="Control Panel" width="480">
+  <img src="docs/control_panel.png" alt="Control Panel" width="640">
   <br><br>
   <img src="docs/floating_widget.png" alt="Floating Widget" width="380">
 </p>
