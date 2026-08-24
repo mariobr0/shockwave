@@ -104,7 +104,7 @@ class WinVoiceUI:
             
         # --- 1. Fixed Shockwave Eye Column (32px diameter) ---
         self.eye_frame = tk.Frame(self.root, bg=self.COLOR_BG, width=44)
-        self.eye_frame.pack(side="left", fill="y", padx=(11, 2))
+        self.eye_frame.pack(side="left", fill="y", padx=(15, 2))
         self.eye_frame.pack_propagate(False)
         
         self.eye_canvas = tk.Canvas(
