@@ -102,7 +102,7 @@ class WinVoiceUI:
         )
         self.grip_label.pack(expand=True)
         
-        # Dragging handlers
+        # Dragging handlers (allows grabbing anywhere on the widget bar)
         self._drag_offset_x = 0
         self._drag_offset_y = 0
         
@@ -120,6 +120,8 @@ class WinVoiceUI:
             widget.bind("<B1-Motion>", do_drag)
             widget.bind("<Enter>", lambda e: (self.grip.config(bg=self.COLOR_GRIP_HOVER), self.grip_label.config(bg=self.COLOR_GRIP_HOVER, fg="#ffffff")))
             widget.bind("<Leave>", lambda e: (self.grip.config(bg=self.COLOR_GRIP), self.grip_label.config(bg=self.COLOR_GRIP, fg=self.COLOR_MUTED)))
+            
+        self.make_draggable = lambda w: (w.bind("<Button-1>", start_drag, add="+"), w.bind("<B1-Motion>", do_drag, add="+"))
             
         # --- 2. Fixed Shockwave Eye Column (32px diameter) ---
         self.eye_frame = tk.Frame(self.root, bg=self.COLOR_BG, width=44)
@@ -272,8 +274,10 @@ class WinVoiceUI:
         self.close_btn.place(relx=1.0, rely=0.0, anchor="ne", x=-3, y=1)
         self.close_btn.bind("<Button-1>", on_close)
         self.close_btn.bind("<Enter>", lambda e: self.close_btn.config(fg="#ff5555"))
-        self.close_btn.bind("<Leave>", lambda e: self.close_btn.config(fg=self.COLOR_MUTED))
-        
+        # Bind dragging to all container frames and background labels for seamless whole-bar moving
+        for bg_widget in (self.root, self.eye_frame, self.right_frame, self.header_frame, self.label, self.controls_frame):
+            self.make_draggable(bg_widget)
+            
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
         width = 250
