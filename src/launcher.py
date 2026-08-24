@@ -148,7 +148,7 @@ def menu():
         llm_endpoint = read_env("LLM_ENDPOINT", "")
         llm_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
         llm_key = read_env("LLM_API_KEY", "")
-        version = getattr(config, "APP_VERSION", "0.9.3")
+        version = getattr(config, "APP_VERSION", "0.9.4")
         
         try:
             title_pad_n = int(read_env("CLI_TITLE_PAD", "14"))
