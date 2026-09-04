@@ -281,6 +281,7 @@ class WinVoiceUI:
         self.setup_taskbar_style()
         
         self.reset_id = None
+        self._topmost_tick = 0
         self.check_queue()
 
     def set_eye_active(self, is_active):
@@ -314,6 +315,24 @@ class WinVoiceUI:
             style = ctypes.windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
             style = (style | WS_EX_TOOLWINDOW) & ~WS_EX_APPWINDOW
             ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style)
+            self.enforce_topmost()
+        except Exception:
+            pass
+
+    def enforce_topmost(self):
+        """Guarantees the window permanently stays above all other windows using native Win32 API."""
+        try:
+            hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
+            if not hwnd:
+                hwnd = self.root.winfo_id()
+            HWND_TOPMOST = -1
+            SWP_NOMOVE = 0x0002
+            SWP_NOSIZE = 0x0001
+            SWP_NOACTIVATE = 0x0010
+            ctypes.windll.user32.SetWindowPos(
+                hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE
+            )
         except Exception:
             pass
 
@@ -321,6 +340,7 @@ class WinVoiceUI:
         """Displays the ready widget and plays startup quote if alert sound is enabled."""
         self.root.deiconify()
         self.setup_taskbar_style()
+        self.enforce_topmost()
         if self.alert_enabled:
             play_startup_sound()
 
@@ -376,6 +396,10 @@ class WinVoiceUI:
         except queue.Empty:
             pass
         finally:
+            self._topmost_tick += 1
+            if self._topmost_tick >= 10:
+                self._topmost_tick = 0
+                self.enforce_topmost()
             self.root.after(100, self.check_queue)
 
     def run(self):
