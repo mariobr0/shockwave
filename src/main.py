@@ -3,6 +3,7 @@ import queue
 import time
 import sys
 import os
+from datetime import datetime
 
 import config
 
@@ -82,10 +83,13 @@ class WinVoiceApp:
                 threading.Thread(target=self.process_audio_thread, daemon=True).start()
 
     def start_recording_thread(self):
+        start_time = datetime.now().strftime("%H:%M:%S")
+        print(f"\nStarted recording {start_time}. ", end="", flush=True)
         self.q.put({"cmd": "show", "text": "record"})
         self.audio.start_recording()
 
     def process_audio_thread(self):
+        print("Stopping recording.")
         self.q.put({"cmd": "show", "text": "processing"})
         
         self.audio.stop_recording()
@@ -94,13 +98,12 @@ class WinVoiceApp:
         if raw_text:
             if self.ui.llm_enabled:
                 self.q.put({"cmd": "show", "text": "normalization"})
-                print(f"Sending to LLM: {raw_text}")
                 final_text = self.llm.normalize(raw_text)
             else:
-                print(f"LLM disabled. Using raw text: {raw_text}")
                 final_text = raw_text
                 
-            print(f"Final text: {final_text}")
+            yellow_final = "\033[38;2;255;215;0m\033[1mFinal text:\033[0m"
+            print(f"{yellow_final} {final_text}")
             self.typer.type_text(final_text)
             self.q.put({"cmd": "show_ready"})
         else:

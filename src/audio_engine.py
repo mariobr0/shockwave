@@ -73,7 +73,6 @@ class AudioEngine:
     def start_recording(self):
         self.audio_data = []
         self.is_recording = True
-        print("Started recording...")
         self.stream = sd.InputStream(
             samplerate=self.sample_rate,
             channels=1,
@@ -84,7 +83,6 @@ class AudioEngine:
 
     def stop_recording(self):
         if self.stream:
-            print("Stopping recording...")
             self.is_recording = False
             self.stream.stop()
             self.stream.close()
@@ -119,8 +117,6 @@ class AudioEngine:
         if duration < 0.5:
             print("Error: Audio too short!")
             return ""
-            
-        print(f"Transcribing audio ({duration:.2f} seconds)...")
         
         try:
             if self.engine_type == "gigaam":
