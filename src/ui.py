@@ -201,12 +201,12 @@ class WinVoiceUI:
         self.controls_frame = tk.Frame(self.right_frame, bg=self.COLOR_BG)
         self.controls_frame.pack(fill="x")
         
-        # LLM norm checkbox
-        self.llm_enabled = False
+        # LLM norm checkbox (initial value from .env LLM_NORM)
+        self.llm_enabled = getattr(config, "LLM_NORM", False)
         def toggle_llm():
             self.llm_enabled = self.use_llm_var.get()
             
-        self.use_llm_var = tk.BooleanVar(value=False)
+        self.use_llm_var = tk.BooleanVar(value=self.llm_enabled)
         self.chk_llm = tk.Checkbutton(
             self.controls_frame,
             text="LLM norm",

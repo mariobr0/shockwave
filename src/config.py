@@ -42,6 +42,7 @@ LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash-lite")
 HOTKEY = os.getenv("HOTKEY", "ctrl+space")
 UI_POSITION = os.getenv("UI_POSITION", "bottom-left")
 
+LLM_NORM = os.getenv("LLM_NORM", "false").strip().lower() in ["true", "1", "yes"]
 ALERT_SOUND = os.getenv("ALERT_SOUND", "true").strip().lower() in ["true", "1", "yes"]
 try:
     UI_OPACITY = float(os.getenv("UI_OPACITY", "0.80"))
