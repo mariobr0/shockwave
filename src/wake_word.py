@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import re
 import time
 import queue
 import threading
@@ -112,41 +113,23 @@ class WakeWordDetector:
             return
 
         try:
-            print(f"[WakeWord] Loading Vosk model from: {candidate_path} ...")
+            print(f"[WakeWord] Loading full Vosk Russian model from: {candidate_path} ...")
             # Suppress excessive Vosk log spam
             vosk.SetLogLevel(-1)
             self.model = vosk.Model(candidate_path)
-            
-            # Dynamic grammar targeting user-configured keyword
-            kw_clean = self.keyword.strip().lower()
-            grammar_list = [kw_clean]
-            for part in kw_clean.split():
-                if part not in grammar_list:
-                    grammar_list.append(part)
-            if "[unk]" not in grammar_list:
-                grammar_list.append("[unk]")
-                
-            grammar_str = json.dumps(grammar_list, ensure_ascii=False)
-            self.recognizer = vosk.KaldiRecognizer(self.model, 16000, grammar_str)
-            print(f"[WakeWord] Detector ready for keyword: '{self.keyword}'")
+            # Use full language model vocabulary so Vosk accurately distinguishes all words
+            self.recognizer = vosk.KaldiRecognizer(self.model, 16000)
+            print(f"[WakeWord] Detector ready with full vocabulary for keyword: '{self.keyword}'")
         except Exception as e:
             print(f"[WakeWord] Model init error: {e}")
 
     def set_keyword(self, new_keyword):
-        """Dynamically updates the wake keyword and reconfigures recognizer grammar."""
+        """Dynamically updates the wake keyword."""
         with self._lock:
             self.keyword = new_keyword.strip().lower()
-            if self.model:
-                kw_clean = self.keyword
-                grammar_list = [kw_clean]
-                for part in kw_clean.split():
-                    if part not in grammar_list:
-                        grammar_list.append(part)
-                if "[unk]" not in grammar_list:
-                    grammar_list.append("[unk]")
-                grammar_str = json.dumps(grammar_list, ensure_ascii=False)
-                self.recognizer = vosk.KaldiRecognizer(self.model, 16000, grammar_str)
-                print(f"[WakeWord] Detector reconfigured for keyword: '{self.keyword}'")
+            if self.recognizer:
+                self.recognizer.Reset()
+            print(f"[WakeWord] Detector reconfigured for keyword: '{self.keyword}'")
 
     def _audio_callback(self, indata, frames, time_info, status):
         """Called by sounddevice.RawInputStream for each audio buffer."""
@@ -176,27 +159,34 @@ class WakeWordDetector:
                 return
 
             now = time.time()
-            # Anti-rebound cooldown: ignore hits within 1.5s of last trigger
-            if now - self._last_trigger_time < 1.5:
+            # Anti-rebound cooldown: ignore hits within 2.0s of last trigger
+            if now - self._last_trigger_time < 2.0:
                 return
 
             detected = False
             kw_clean = self.keyword.strip().lower()
+            pattern = r'(?:\b|^)' + re.escape(kw_clean) + r'(?:\b|$)'
+
             if self.recognizer.AcceptWaveform(pcm_bytes):
                 res = json.loads(self.recognizer.Result())
-                text = res.get("text", "").lower()
-                if kw_clean in text:
-                    detected = True
+                text = res.get("text", "").lower().strip()
+                if text:
+                    words = text.split()
+                    if kw_clean in words or re.search(pattern, text):
+                        detected = True
             else:
                 pres = json.loads(self.recognizer.PartialResult())
-                ptext = pres.get("partial", "").lower()
-                if kw_clean in ptext:
-                    detected = True
+                ptext = pres.get("partial", "").lower().strip()
+                if ptext:
+                    p_words = ptext.split()
+                    # Only match if the exact keyword appears as a standalone word
+                    if kw_clean in p_words:
+                        detected = True
 
             if detected:
                 self._last_trigger_time = now
                 self.recognizer.Reset()
-                print(f"\n[WakeWord] Trigger word detected: '{self.keyword}'!")
+                print(f"\n[WakeWord] Exact trigger word detected: '{self.keyword}'!")
                 if self.on_wake_callback:
                     threading.Thread(target=self.on_wake_callback, daemon=True).start()
 
