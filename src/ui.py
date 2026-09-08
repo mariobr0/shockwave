@@ -2,6 +2,7 @@ import tkinter as tk
 import queue
 import os
 import sys
+import math
 import winsound
 import ctypes
 import config
@@ -118,6 +119,8 @@ class WinVoiceUI:
         self.eye_canvas.place(relx=0.5, rely=0.5, anchor="center")
         
         self.is_eye_active = False
+        self._breath_after_id = None
+        self._breath_phase = 0.0
         
         self.eye_circle = self.eye_canvas.create_oval(
             2, 2, 30, 30,
@@ -182,6 +185,7 @@ class WinVoiceUI:
         )
 
         def on_cancel_click(event=None):
+            self.stop_breathing()
             if self.on_cancel:
                 self.on_cancel()
             else:
@@ -287,6 +291,7 @@ class WinVoiceUI:
 
     def set_eye_active(self, is_active):
         """Switches between solid yellow (active) and purple with yellow outline (inactive)."""
+        self.stop_breathing()
         self.is_eye_active = is_active
         if is_active:
             self.eye_canvas.itemconfig(
@@ -300,6 +305,36 @@ class WinVoiceUI:
                 fill=self.COLOR_INACTIVE_FILL,
                 outline=self.COLOR_INACTIVE_OUTLINE
             )
+
+    def start_breathing(self):
+        """Starts a gentle pulsating glow animation on the eye during voice recording."""
+        self.stop_breathing()
+        self.is_eye_active = True
+        self._breath_phase = 0.0
+        self._pulse_tick()
+
+    def _pulse_tick(self):
+        """Calculates smooth sine wave interpolation between warm amber-gold and radiant light-gold."""
+        # 40ms interval (~25 FPS), increment 0.12 gives a smooth breath cycle in ~2.1 seconds
+        self._breath_phase += 0.12
+        factor = (math.sin(self._breath_phase) + 1.0) / 2.0
+        
+        r = int(190 + (255 - 190) * factor)
+        g = int(140 + (235 - 140) * factor)
+        b = int(0 + (90 - 0) * factor)
+        hex_color = f"#{r:02x}{g:02x}{b:02x}"
+        
+        self.eye_canvas.itemconfig(self.eye_circle, fill=hex_color, outline=hex_color)
+        self._breath_after_id = self.root.after(40, self._pulse_tick)
+
+    def stop_breathing(self):
+        """Stops the breathing animation and cancels the scheduled timer."""
+        if self._breath_after_id:
+            try:
+                self.root.after_cancel(self._breath_after_id)
+            except Exception:
+                pass
+            self._breath_after_id = None
 
     def setup_taskbar_style(self):
         """Applies WS_EX_TOOLWINDOW to ensure the floating widget stays hidden from the taskbar."""
@@ -346,6 +381,7 @@ class WinVoiceUI:
             play_startup_sound()
 
     def reset_to_idle(self):
+        self.stop_breathing()
         self.label.config(text=self.idle_text)
         self.cancel_btn.pack_forget()
         self.set_eye_active(False)
@@ -367,7 +403,7 @@ class WinVoiceUI:
                     
                     if txt == "record":
                         self.cancel_btn.pack(side="left", padx=(10, 0))
-                        self.set_eye_active(True)
+                        self.start_breathing()
                     elif txt in ["processing", "normalization"]:
                         self.cancel_btn.pack_forget()
                         self.set_eye_active(True)
