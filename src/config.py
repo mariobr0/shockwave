@@ -19,6 +19,9 @@ else:
 os.makedirs(MODELS_DIR, exist_ok=True)
 WHISPER_DIR = os.path.join(MODELS_DIR, "whisper")
 GIGAAM_DIR = os.path.join(MODELS_DIR, "gigaam")
+VOSK_DIR = os.path.join(MODELS_DIR, "vosk-model-small-ru")
+VOSK_MODEL_PATH = os.getenv("VOSK_MODEL_PATH", VOSK_DIR)
+VOSK_MODEL_URL = os.getenv("VOSK_MODEL_URL", "https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip")
 
 os.environ["HF_HOME"] = MODELS_DIR
 os.environ["HF_HUB_CACHE"] = MODELS_DIR
@@ -44,6 +47,8 @@ UI_POSITION = os.getenv("UI_POSITION", "bottom-left")
 
 LLM_NORM = os.getenv("LLM_NORM", "false").strip().lower() in ["true", "1", "yes"]
 ALERT_SOUND = os.getenv("ALERT_SOUND", "true").strip().lower() in ["true", "1", "yes"]
+WAKE_WORD_ENABLED = os.getenv("WAKE_WORD_ENABLED", "true").strip().lower() in ["true", "1", "yes"]
+WAKE_WORD = os.getenv("WAKE_WORD", "мегатрон")
 try:
     UI_OPACITY = float(os.getenv("UI_OPACITY", "0.80"))
 except (ValueError, TypeError):

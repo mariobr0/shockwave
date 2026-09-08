@@ -24,6 +24,7 @@ class AudioEngine:
         self.audio_data = []
         self.sample_rate = 16000
         self.is_recording = False
+        self.on_audio_chunk = None
         
         self.engine_type = (os.getenv("STT_ENGINE") or config.STT_ENGINE).lower()
         self.model = None
@@ -69,6 +70,8 @@ class AudioEngine:
             pass
         if self.is_recording:
             self.audio_data.append(indata.copy())
+            if self.on_audio_chunk:
+                self.on_audio_chunk(indata)
 
     def start_recording(self):
         self.audio_data = []
@@ -81,12 +84,20 @@ class AudioEngine:
         )
         self.stream.start()
 
-    def stop_recording(self):
+    def stop_recording(self, trim_seconds=0.0):
         if self.stream:
             self.is_recording = False
             self.stream.stop()
             self.stream.close()
             self.stream = None
+            
+        if trim_seconds > 0.0 and self.audio_data:
+            samples_to_trim = int(trim_seconds * self.sample_rate)
+            audio_np = np.concatenate(self.audio_data, axis=0).flatten()
+            if len(audio_np) > samples_to_trim:
+                trimmed_np = audio_np[:-samples_to_trim]
+                self.audio_data = [trimmed_np.reshape(-1, 1)]
+                print(f"[AudioEngine] Trimmed last {trim_seconds}s from recording.")
 
     def cancel_recording(self):
         """Immediately stops the stream and flushes all audio buffers without saving."""

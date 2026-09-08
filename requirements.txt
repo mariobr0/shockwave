@@ -12,3 +12,4 @@ onnx-asr
 huggingface-hub
 pillow
 av
+vosk

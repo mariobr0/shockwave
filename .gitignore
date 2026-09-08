@@ -24,6 +24,8 @@ models/whisper/*
 !models/whisper/.gitkeep
 models/gigaam/*
 !models/gigaam/.gitkeep
+models/vosk-model-small-ru/*
+!models/vosk-model-small-ru/.gitkeep
 
 # Other temp formats
 *.psd

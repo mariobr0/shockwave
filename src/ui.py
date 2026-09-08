@@ -33,10 +33,11 @@ def play_startup_sound():
             print(f"Startup audio error: {e}")
 
 class WinVoiceUI:
-    def __init__(self, message_queue, position="bottom-left", on_trigger=None, on_cancel=None):
+    def __init__(self, message_queue, position="bottom-left", on_trigger=None, on_cancel=None, on_toggle_wake=None):
         self.queue = message_queue
         self.on_trigger = on_trigger
         self.on_cancel = on_cancel
+        self.on_toggle_wake = on_toggle_wake
         self.root = tk.Tk()
         
         # Hide window immediately during setup to avoid top-left blank flash
@@ -284,7 +285,31 @@ class WinVoiceUI:
             cursor="hand2",
             padx=0
         )
-        self.chk_alert.pack(side="left")
+        self.chk_alert.pack(side="left", padx=(0, 6))
+        
+        # Wake word checkbox (initial value from .env WAKE_WORD_ENABLED)
+        self.wake_enabled = getattr(config, "WAKE_WORD_ENABLED", True)
+        def toggle_wake():
+            self.wake_enabled = self.use_wake_var.get()
+            if self.on_toggle_wake:
+                self.on_toggle_wake(self.wake_enabled)
+            
+        self.use_wake_var = tk.BooleanVar(value=self.wake_enabled)
+        self.chk_wake = tk.Checkbutton(
+            self.controls_frame,
+            text="wake",
+            variable=self.use_wake_var,
+            command=toggle_wake,
+            bg=self.COLOR_BG,
+            fg=self.COLOR_MUTED,
+            selectcolor=self.COLOR_GRIP,
+            activebackground=self.COLOR_BG,
+            activeforeground="#ffffff",
+            font=("Segoe UI", 8),
+            cursor="hand2",
+            padx=0
+        )
+        self.chk_wake.pack(side="left")
         
         # Close button in top-right
         def on_close(event=None):
@@ -301,7 +326,7 @@ class WinVoiceUI:
             
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        width = 237
+        width = 275
         height = 62
         
         if position == "bottom-right":

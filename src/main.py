@@ -7,13 +7,14 @@ from datetime import datetime
 
 import config
 
-from ui import WinVoiceUI, get_resource_path
+from ui import WinVoiceUI, get_resource_path, play_ready_sound
 from audio_engine import AudioEngine
 from llm_normalizer import LLMNormalizer
 from typer import Typer
 from hotkey_manager import SystemHotkeyManager
 from single_instance import check_single_instance, release_single_instance
 from tray_manager import SystemTrayManager, hide_console, show_console
+from wake_word import WakeWordDetector
 
 class WinVoiceApp:
     def __init__(self, is_silent=False):
@@ -33,15 +34,24 @@ class WinVoiceApp:
         self.is_processing = False
         self.lock = threading.Lock()
         
-        # Initialize UI with click-to-trigger handler and cancel handler
+        # 2. Wake Word Detector (Vosk)
+        self.wake_detector = WakeWordDetector(on_wake_callback=self.on_wake_trigger)
+        self.audio.on_audio_chunk = self.wake_detector.feed_audio
+        
+        # Initialize UI with click-to-trigger handler, cancel handler and wake word toggle
         self.ui = WinVoiceUI(
             self.q,
             position=config.UI_POSITION,
             on_trigger=self.toggle_recording,
-            on_cancel=self.cancel_recording
+            on_cancel=self.cancel_recording,
+            on_toggle_wake=self.on_toggle_wake
         )
         
-        # 2. System Tray Manager: Place Shockwave icon next to clock with toggle & exit menu
+        # Activate wake word listener if enabled in settings
+        if self.ui.wake_enabled:
+            self.wake_detector.enable()
+        
+        # 3. System Tray Manager: Place Shockwave icon next to clock with toggle & exit menu
         icon_path = get_resource_path(os.path.join("icons", "icon.ico"))
         self.tray = SystemTrayManager(
             icon_path=icon_path,
@@ -50,13 +60,41 @@ class WinVoiceApp:
         )
         self.tray.start()
         
-        # 3. Register permanent system-level hotkey via Win32 RegisterHotKey
+        # 4. Register permanent system-level hotkey via Win32 RegisterHotKey
         self.hotkey_mgr = SystemHotkeyManager(config.HOTKEY, self.toggle_recording)
-        yellow_eye = "\033[38;2;255;215;0m\033[1mEye\033[0m"
-        print(f"Shockwave started. Press {config.HOTKEY.upper()} or click the {yellow_eye} to record.")
+        yellow_radar = "\033[38;2;255;215;0m\033[1mRadar\033[0m"
+        wake_keyword = getattr(config, "WAKE_WORD", "мегатрон")
+        print(f"Shockwave started. Press {config.HOTKEY.upper()}, click {yellow_radar} or say '{wake_keyword.capitalize()}' to record.")
         
         # Hide console window to system tray smoothly
         hide_console()
+
+    def on_toggle_wake(self, is_enabled):
+        if is_enabled:
+            print("[Shockwave] Wake word detection enabled.")
+            self.wake_detector.enable()
+        else:
+            print("[Shockwave] Wake word detection disabled.")
+            self.wake_detector.disable()
+
+    def on_wake_trigger(self):
+        """Called automatically when the wake word ('Мегатрон') is detected."""
+        with self.lock:
+            if self.is_processing:
+                return
+                
+            if not self.is_recording:
+                # First 'Мегатрон': start voice recording
+                self.is_recording = True
+                self.wake_detector.pause_mic()
+                if self.ui.alert_enabled:
+                    play_ready_sound()
+                threading.Thread(target=self.start_recording_thread, daemon=True).start()
+            else:
+                # Second 'Мегатрон': stop recording with wake word trimming
+                self.is_recording = False
+                self.is_processing = True
+                threading.Thread(target=lambda: self.process_audio_thread(is_wake_word=True), daemon=True).start()
 
     def cancel_recording(self):
         """Discards active recording immediately and resets UI state."""
@@ -67,6 +105,7 @@ class WinVoiceApp:
             self.is_recording = False
             self.is_processing = False
             self.audio.cancel_recording()
+            self.wake_detector.resume_mic()
             self.q.put({"cmd": "show", "text": "what is your command?"})
 
     def toggle_recording(self):
@@ -76,11 +115,12 @@ class WinVoiceApp:
                 
             if not self.is_recording:
                 self.is_recording = True
+                self.wake_detector.pause_mic()
                 threading.Thread(target=self.start_recording_thread, daemon=True).start()
             else:
                 self.is_recording = False
                 self.is_processing = True
-                threading.Thread(target=self.process_audio_thread, daemon=True).start()
+                threading.Thread(target=lambda: self.process_audio_thread(is_wake_word=False), daemon=True).start()
 
     def start_recording_thread(self):
         start_time = datetime.now().strftime("%H:%M:%S")
@@ -89,11 +129,13 @@ class WinVoiceApp:
         self.q.put({"cmd": "show", "text": "record"})
         self.audio.start_recording()
 
-    def process_audio_thread(self):
+    def process_audio_thread(self, is_wake_word=False):
         print("Stopping recording.")
         self.q.put({"cmd": "show", "text": "processing"})
         
-        self.audio.stop_recording()
+        # Trim last ~1.1 seconds only if recording was stopped by saying the wake word
+        trim_duration = 1.1 if is_wake_word else 0.0
+        self.audio.stop_recording(trim_seconds=trim_duration)
         raw_text = self.audio.transcribe()
         
         if raw_text:
@@ -114,12 +156,15 @@ class WinVoiceApp:
         with self.lock:
             self.is_processing = False
             self.is_recording = False
+            self.wake_detector.resume_mic()
 
     def quit_app(self):
         """Cleanly signals UI to quit."""
         self.q.put({"cmd": "quit"})
 
     def cleanup(self):
+        if hasattr(self, 'wake_detector'):
+            self.wake_detector.disable()
         if hasattr(self, 'tray'):
             self.tray.stop()
         if hasattr(self, 'hotkey_mgr'):
