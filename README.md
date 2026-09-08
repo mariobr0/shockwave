@@ -6,9 +6,10 @@
 
 *(Описание на русском ниже)*
 
-**Shockwave** is an open-source, local-first background voice dictation tool for Windows. It allows you to dictate text via a global hotkey or by clicking the on-screen glowing eye, automatically normalizes punctuation and tech terminology using an LLM, and copies the resulting text directly to your clipboard.
+**Shockwave** is an open-source, local-first background voice dictation tool for Windows. It allows you to dictate text completely hands-free via a customizable wake word (powered by Vosk), via a global hotkey, or by clicking the interactive radar button. It automatically normalizes punctuation and tech terminology using an LLM and types/copies the resulting text directly to your focused window.
 
-### Speech Recognition Models (STT):
+### Speech Recognition Models:
+- **Wake Word Engine (`Vosk`)**: Ultra-lightweight offline acoustic model (`vosk-model-small-ru-0.22`) for continuous background wake word listening with near-zero CPU footprint.
 - **Whisper (`large-v3-turbo`)**: State-of-the-art turbo model by OpenAI, optimized for speed. Ideal for mixed English/Russian speech and programming terminology. Runs locally via `faster-whisper`.
 - **GigaAM (`gigaam-v3-e2e-rnnt`)**: ONNX version of Sber's GigaAM acoustic model, ported by Ilya Stupakov for fast CPU execution. Runs in `int8` or `float32` format via `onnx-asr`.
 
@@ -16,14 +17,16 @@
 - **Gemini (`gemini-2.5-flash-lite`) / OpenAI Compatible**: Lightweight, fast AI model used for punctuation restoration, formatting, and technical term capitalization.
 
 ## Features
+* **Hands-Free Wake Word (Vosk):** Fully voice-driven recording. Say your wake word (default: *"Мегатрон"*) to start recording, and say it again to stop. The keyword is automatically trimmed from the end of the audio. Wake word is fully customizable in the launcher settings!
 * **Rock-Solid System Hotkey:** Native Win32 `RegisterHotKey` (Default `Ctrl + Space`). Never drops out after system sleep, lock screen, or long background sessions.
-* **Interactive Shockwave Eye:** Interactive glowing eye button on the widget that ignites in vibrant yellow (`#FFD700`) during recording. Click-to-record supported!
+* **Dynamic Dot-Matrix Radar:** Sleek 32×32 px square button with a 5×5 LED micro-pixel matrix featuring a real-time rotating radar sweep and glowing trail during active recording. Click-to-record supported!
+* **Widget Quick Toggles:** Floating toolbar switches for instant toggling of `wake` listening, `LLM norm`, and audio chimes (`alert`).
 * **Dual Speech-to-Text (STT):** Choose between Whisper (mixed IT speech) and GigaAM (ultra-fast Russian speech).
-* **Fully Portable & Compact Storage:** Flat directory structure saves weights locally in `models/` with zero bloat (only ~1.76 GB for both neural networks).
+* **Fully Portable & Compact Storage:** Flat directory structure saves weights locally in `models/` with zero bloat (only ~1.76 GB for speech models).
 * **Draggable Floating Widget:** Minimalist on-screen overlay that can be smoothly repositioned across any screen using the left grip handle (`⋮⋮`).
 * **Permanent Taskbar Presence:** Clean window lifecycle with permanent icon visibility on Windows Taskbar and smooth flicker-free startup.
-* **Bilingual Interactive Launcher:** Console control panel supporting language switching (English / Russian), model management, and transparent API configuration.
-* **Audio Notifications:** Subtle sound notification plays when transcription is copied and ready to paste.
+* **Bilingual Interactive Launcher:** Console control panel supporting language switching (English / Russian), model management, wake word configuration, and transparent API setup.
+* **Audio Notifications:** Distinct sound chime plays when recording begins, and when transcription is copied and ready.
 * **Safe Terminal Logging:** The console maintains a real-time transcript history to ensure no dictated text is lost.
 
 ## Documentation & Installation
@@ -36,9 +39,10 @@ Detailed guides are available below:
 
 # Shockwave
 
-**Shockwave** — это легковесный инструмент для голосовой диктовки на Windows, работающий в фоновом режиме. Он позволяет надиктовывать текст по нажатию глобальной горячей клавиши или клику по светящемуся глазу на панели, автоматически расставляет знаки препинания с помощью нейросети и копирует результат в буфер обмена.
+**Shockwave** — это легковесный инструмент для голосовой диктовки на Windows, работающий в фоновом режиме. Он позволяет надиктовывать текст полностью без рук с помощью кодового слова (на базе Vosk), по нажатию глобальной горячей клавиши или клику по интерактивной радарной кнопке на панели, автоматически расставляет знаки препинания с помощью нейросети и копирует/вставляет результат прямо в активное окно.
 
-### Модели распознавания речи (STT):
+### Модели распознавания речи:
+- **Движок кодового слова (`Vosk`)**: Сверхлегковесная локальная модель (`vosk-model-small-ru-0.22`) для непрерывного фонового распознавания кодового слова с минимальной нагрузкой на процессор.
 - **Whisper (`large-v3-turbo`)**: Новая турбо-версия большой модели Whisper от OpenAI. Идеальна для смешанной русско-английской речи и IT-терминов. Запускается локально через `faster-whisper`.
 - **GigaAM (`gigaam-v3-e2e-rnnt`)**: ONNX-версия нейросети GigaAM от Сбера, портированная Ильей Ступаковым для работы на процессорах. Загружается в версии `int8` или `float32` через `onnx-asr`.
 
@@ -46,14 +50,16 @@ Detailed guides are available below:
 - **Gemini (`gemini-2.5-flash-lite`) / OpenAI-совместимый**: Быстрая языковая модель от Google для восстановления пунктуации, форматирования и исправления опечаток.
 
 ## Возможности
+* **Голосовая активация без рук (Hands-Free на базе Vosk):** Управляйте записью только голосом. Произнесите кодовое слово (по умолчанию *«Мегатрон»*) для старта, и повторите его для завершения. Стоп-слово автоматически вырезается из конца записи. Кодовое слово можно свободно сменить в меню лаунчера!
 * **Надёжная системная горячая клавиша:** Работает через ядро Windows (`RegisterHotKey`, по умолчанию `Ctrl + Space`). Никогда не отваливается после сна или блокировки экрана.
-* **Интерактивный «Глаз Shockwave»:** Светящийся глаз-кнопка на виджете, вспыхивающий ярко-жёлтым светом (`#FFD700`) во время записи. Поддерживает запуск диктовки кликом мыши!
+* **Интерактивный матричный радар (Dot-Matrix Radar):** Стильная кнопка 32×32 px со светодиодной матрицей 5×5 пикселей и плавной 28 FPS анимацией вращающегося луча радара во время записи. Поддерживает запуск диктовки кликом мыши!
+* **Быстрые тумблеры на виджете:** Удобное управление прямо на плавающей панели: переключатели `wake` (голосовая активация), `LLM norm` (нормализация текста нейросетью) и `alert` (звуковые сигналы).
 * **Два движка распознавания (STT):** Быстрый выбор между Whisper (для смешанной IT-речи) и GigaAM (очень быстрый для русской речи).
-* **Полная портативность и компактность:** Оптимизированная структура хранения моделей в `models/` без дубликатов (всего ~1.76 ГБ для двух моделей).
+* **Полная портативность и компактность:** Оптимизированная структура хранения моделей в `models/` без дубликатов (всего ~1.76 ГБ для речевых моделей).
 * **Перемещаемый виджет:** Аккуратная плашка статуса, которую можно свободно перетаскивать мышкой за левую ручку (`⋮⋮`) в любое место любого экрана.
 * **Постоянная иконка в таскбаре:** Плавный запуск без мерцаний и постоянное отображение иконки приложения на панели задач Windows.
-* **Двуязычная панель управления:** Консольный лаунчер с поддержкой переключения языка (RU / EN), проверки моделей и прозрачной настройки эндпоинта и ключа.
-* **Звуковой сигнал:** Аудио-оповещение при успешном завершении диктовки.
+* **Двуязычная панель управления:** Консольный лаунчер с поддержкой переключения языка (RU / EN), проверки моделей, смены кодового слова и настройки API.
+* **Звуковой сигнал:** Отдельные аккуратные сигналы при старте записи по слову и при завершении диктовки.
 * **Бекап-лог:** Консоль сохраняет лог и всю историю расшифровок в рамках открытой сессии.
 
 ## Документация и Установка
