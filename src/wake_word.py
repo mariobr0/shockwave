@@ -117,13 +117,36 @@ class WakeWordDetector:
             vosk.SetLogLevel(-1)
             self.model = vosk.Model(candidate_path)
             
-            # Focused grammar targeting 'мегатрон' and variations
-            grammar_list = ["мегатрон", "мега трон", "мега", "трон", "[unk]"]
+            # Dynamic grammar targeting user-configured keyword
+            kw_clean = self.keyword.strip().lower()
+            grammar_list = [kw_clean]
+            for part in kw_clean.split():
+                if part not in grammar_list:
+                    grammar_list.append(part)
+            if "[unk]" not in grammar_list:
+                grammar_list.append("[unk]")
+                
             grammar_str = json.dumps(grammar_list, ensure_ascii=False)
             self.recognizer = vosk.KaldiRecognizer(self.model, 16000, grammar_str)
             print(f"[WakeWord] Detector ready for keyword: '{self.keyword}'")
         except Exception as e:
             print(f"[WakeWord] Model init error: {e}")
+
+    def set_keyword(self, new_keyword):
+        """Dynamically updates the wake keyword and reconfigures recognizer grammar."""
+        with self._lock:
+            self.keyword = new_keyword.strip().lower()
+            if self.model:
+                kw_clean = self.keyword
+                grammar_list = [kw_clean]
+                for part in kw_clean.split():
+                    if part not in grammar_list:
+                        grammar_list.append(part)
+                if "[unk]" not in grammar_list:
+                    grammar_list.append("[unk]")
+                grammar_str = json.dumps(grammar_list, ensure_ascii=False)
+                self.recognizer = vosk.KaldiRecognizer(self.model, 16000, grammar_str)
+                print(f"[WakeWord] Detector reconfigured for keyword: '{self.keyword}'")
 
     def _audio_callback(self, indata, frames, time_info, status):
         """Called by sounddevice.RawInputStream for each audio buffer."""
@@ -158,15 +181,16 @@ class WakeWordDetector:
                 return
 
             detected = False
+            kw_clean = self.keyword.strip().lower()
             if self.recognizer.AcceptWaveform(pcm_bytes):
                 res = json.loads(self.recognizer.Result())
                 text = res.get("text", "").lower()
-                if self.keyword in text or "мегатрон" in text or "мега трон" in text:
+                if kw_clean in text:
                     detected = True
             else:
                 pres = json.loads(self.recognizer.PartialResult())
                 ptext = pres.get("partial", "").lower()
-                if self.keyword in ptext or "мегатрон" in ptext or "мега трон" in ptext:
+                if kw_clean in ptext:
                     detected = True
 
             if detected:

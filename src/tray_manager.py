@@ -217,7 +217,7 @@ class SystemTrayManager:
     Lightweight Win32 System Tray Icon manager using native ctypes.
     Runs a message pump in a background thread.
     """
-    def __init__(self, icon_path=None, tooltip="Shockwave v0.9.6", on_quit=None):
+    def __init__(self, icon_path=None, tooltip="Shockwave v1.0.0", on_quit=None):
         self.icon_path = icon_path
         self.tooltip = tooltip
         self.on_quit = on_quit

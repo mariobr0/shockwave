@@ -145,10 +145,13 @@ def menu():
             q_suffix = f", {quant}" if quant else ""
             stt_display = f"GigaAM ({gigaam_m}{q_suffix})"
 
+        wake_word = read_env("WAKE_WORD", "мегатрон")
+        wake_display = f"Vosk (\"{wake_word}\")"
+
         llm_endpoint = read_env("LLM_ENDPOINT", "")
         llm_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
         llm_key = read_env("LLM_API_KEY", "")
-        version = getattr(config, "APP_VERSION", "0.9.6")
+        version = getattr(config, "APP_VERSION", "1.0.0")
         
         try:
             title_pad_n = int(read_env("CLI_TITLE_PAD", "14"))
@@ -164,33 +167,37 @@ def menu():
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "НЕ УСТАНОВЛЕН")
             print(f"{t_pad}{PURPLE}{BOLD}SHOCKWAVE v{version}{RESET}\n")
             print("Текущие настройки:")
-            print(f"- STT Движок:   {stt_display}")
-            print(f"- LLM Эндпоинт: {endpoint_display}")
-            print(f"- LLM Модель:   {llm_model}")
-            print(f"- Ключ LLM:     {key_display}\n")
+            print(f"- STT Движок:    {stt_display}")
+            print(f"- Кодовое слово: {wake_display}")
+            print(f"- LLM Эндпоинт:  {endpoint_display}")
+            print(f"- LLM Модель:    {llm_model}")
+            print(f"- Ключ LLM:      {key_display}\n")
             print("1. Запустить Shockwave")
             print("2. Настроить API-ключ и LLM")
             print("3. Выбрать движок распознавания (STT)")
-            print("4. Скачать/Проверить модели распознавания")
-            print("5. Change language to English")
-            print("6. Выход\n")
-            prompt_text = "Ваш выбор (1-6): "
+            print("4. Настроить кодовое слово (Wake Word)")
+            print("5. Скачать/Проверить модели распознавания")
+            print("6. Change language to English")
+            print("7. Выход\n")
+            prompt_text = "Ваш выбор (1-7): "
         else:
             endpoint_display = safe_endpoint if safe_endpoint else "NOT SET"
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "NOT SET")
             print(f"{t_pad}{PURPLE}{BOLD}SHOCKWAVE v{version}{RESET}\n")
             print("Current Settings:")
             print(f"- STT Engine:   {stt_display}")
+            print(f"- Wake Word:    {wake_display}")
             print(f"- LLM Endpoint: {endpoint_display}")
             print(f"- LLM Model:    {llm_model}")
             print(f"- LLM Key:      {key_display}\n")
             print("1. Start Shockwave")
             print("2. Configure API Key & LLM")
             print("3. Select STT Engine")
-            print("4. Download / Verify STT Models")
-            print("5. Сменить язык на русский")
-            print("6. Exit\n")
-            prompt_text = "Your choice (1-6): "
+            print("4. Configure Wake Word")
+            print("5. Download / Verify STT Models")
+            print("6. Сменить язык на русский")
+            print("7. Exit\n")
+            prompt_text = "Your choice (1-7): "
         
         choice = input(prompt_text).strip()
         
@@ -223,16 +230,18 @@ def menu():
         elif choice == "3":
             setup_stt(lang)
         elif choice == "4":
+            setup_wake_word(lang)
+        elif choice == "5":
             import model_manager
             model_manager.check_and_prompt(auto_start=False)
             if lang == "ru":
                 input("\nНажмите Enter, чтобы вернуться в меню...")
             else:
                 input("\nPress Enter to return to menu...")
-        elif choice == "5":
+        elif choice == "6":
             new_lang = "ru" if lang == "en" else "en"
             update_env("APP_LANGUAGE", new_lang)
-        elif choice == "6":
+        elif choice == "7":
             sys.exit(0)
 
 def setup_llm(lang="en"):
@@ -310,6 +319,28 @@ def setup_stt(lang="en"):
         elif choice == "2":
             update_env("STT_ENGINE", "gigaam")
             print(f"Selected engine: GigaAM ({gigaam_m})")
+        input("\nPress Enter to return...")
+
+def setup_wake_word(lang="en"):
+    current_kw = read_env("WAKE_WORD", "мегатрон")
+    
+    if lang == "ru":
+        print("\n--- Настройка кодового слова (Wake Word) ---")
+        print("Модель детектора: Vosk (vosk-model-small-ru)")
+        print(f"Текущее кодовое слово: \"{current_kw}\"")
+        new_kw = input("\nВведите новое кодовое слово (или Enter, чтобы оставить): ").strip()
+        if new_kw:
+            update_env("WAKE_WORD", new_kw.lower())
+            print(f"Кодовое слово успешно изменено на: \"{new_kw.lower()}\"!")
+        input("\nНажмите Enter для возврата...")
+    else:
+        print("\n--- Wake Word Settings ---")
+        print("Detector Model: Vosk (vosk-model-small-ru)")
+        print(f"Current Wake Word: \"{current_kw}\"")
+        new_kw = input("\nEnter new wake word (or press Enter to keep): ").strip()
+        if new_kw:
+            update_env("WAKE_WORD", new_kw.lower())
+            print(f"Wake word successfully changed to: \"{new_kw.lower()}\"!")
         input("\nPress Enter to return...")
 
 if __name__ == "__main__":
