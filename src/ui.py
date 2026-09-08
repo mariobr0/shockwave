@@ -119,17 +119,50 @@ class WinVoiceUI:
         self.eye_canvas.place(relx=0.5, rely=0.5, anchor="center")
         
         self.is_eye_active = False
-        self._breath_after_id = None
-        self._breath_phase = 0.0
+        self._radar_after_id = None
+        self._radar_angle = 0.0
         
-        self.eye_circle = self.eye_canvas.create_oval(
+        # Square button background & border
+        self.matrix_border = self.eye_canvas.create_rectangle(
             2, 2, 30, 30,
             fill=self.COLOR_INACTIVE_FILL,
             outline=self.COLOR_INACTIVE_OUTLINE,
             width=1.5
         )
         
-        # Click handler for Eye
+        # 5x5 LED Dot Matrix setup (25 square micro-pixels)
+        self.COLOR_DOT_INACTIVE = "#442e56"
+        self.COLOR_DOT_HOVER = "#785396"
+        self.COLOR_DOT_ACTIVE = "#FFD700"
+        self.matrix_dots = []
+        
+        cx, cy = 16.0, 16.0
+        step = 5.0
+        half_dot = 1.4
+        for row in range(5):
+            y = cy + (row - 2) * step
+            for col in range(5):
+                x = cx + (col - 2) * step
+                dx = x - cx
+                dy = y - cy
+                is_center = (row == 2 and col == 2)
+                dot_angle = math.atan2(dy, dx)
+                if dot_angle < 0:
+                    dot_angle += 2 * math.pi
+                    
+                dot_id = self.eye_canvas.create_rectangle(
+                    x - half_dot, y - half_dot,
+                    x + half_dot, y + half_dot,
+                    fill=self.COLOR_DOT_INACTIVE,
+                    outline=""
+                )
+                self.matrix_dots.append({
+                    "id": dot_id,
+                    "angle": dot_angle,
+                    "is_center": is_center
+                })
+        
+        # Click handler for Radar Matrix Button
         def on_eye_click(event=None):
             if self.on_trigger:
                 self.on_trigger()
@@ -138,18 +171,22 @@ class WinVoiceUI:
         def on_eye_enter(event=None):
             if not self.is_eye_active:
                 self.eye_canvas.itemconfig(
-                    self.eye_circle,
+                    self.matrix_border,
                     fill=self.COLOR_HOVER_FILL,
                     outline=self.COLOR_HOVER_OUTLINE
                 )
+                for dot in self.matrix_dots:
+                    self.eye_canvas.itemconfig(dot["id"], fill=self.COLOR_DOT_HOVER)
                 
         def on_eye_leave(event=None):
             if not self.is_eye_active:
                 self.eye_canvas.itemconfig(
-                    self.eye_circle,
+                    self.matrix_border,
                     fill=self.COLOR_INACTIVE_FILL,
                     outline=self.COLOR_INACTIVE_OUTLINE
                 )
+                for dot in self.matrix_dots:
+                    self.eye_canvas.itemconfig(dot["id"], fill=self.COLOR_DOT_INACTIVE)
                 
         self.eye_canvas.bind("<Button-1>", on_eye_click)
         self.eye_canvas.bind("<Enter>", on_eye_enter)
@@ -185,7 +222,7 @@ class WinVoiceUI:
         )
 
         def on_cancel_click(event=None):
-            self.stop_breathing()
+            self.stop_radar()
             if self.on_cancel:
                 self.on_cancel()
             else:
@@ -290,51 +327,87 @@ class WinVoiceUI:
         self.check_queue()
 
     def set_eye_active(self, is_active):
-        """Switches between solid yellow (active) and purple with yellow outline (inactive)."""
-        self.stop_breathing()
+        """Switches between active state (solid golden matrix) and inactive state (subtle purple grid)."""
+        self.stop_radar()
         self.is_eye_active = is_active
         if is_active:
             self.eye_canvas.itemconfig(
-                self.eye_circle,
-                fill=self.COLOR_ACTIVE_FILL,
+                self.matrix_border,
+                fill=self.COLOR_INACTIVE_FILL,
                 outline=self.COLOR_ACTIVE_OUTLINE
             )
+            for dot in self.matrix_dots:
+                self.eye_canvas.itemconfig(
+                    dot["id"],
+                    fill=self.COLOR_DOT_ACTIVE
+                )
         else:
             self.eye_canvas.itemconfig(
-                self.eye_circle,
+                self.matrix_border,
                 fill=self.COLOR_INACTIVE_FILL,
                 outline=self.COLOR_INACTIVE_OUTLINE
             )
+            for dot in self.matrix_dots:
+                self.eye_canvas.itemconfig(
+                    dot["id"],
+                    fill=self.COLOR_DOT_INACTIVE
+                )
 
-    def start_breathing(self):
-        """Starts a gentle pulsating glow animation on the eye during voice recording."""
-        self.stop_breathing()
+    def start_radar(self):
+        """Starts the rotating radar sweep animation with trailing fade across the dot matrix."""
+        self.stop_radar()
         self.is_eye_active = True
-        self._breath_phase = 0.0
-        self._pulse_tick()
+        self._radar_angle = 0.0
+        self.eye_canvas.itemconfig(
+            self.matrix_border,
+            fill=self.COLOR_INACTIVE_FILL,
+            outline=self.COLOR_ACTIVE_OUTLINE
+        )
+        self._radar_tick()
 
-    def _pulse_tick(self):
-        """Calculates smooth sine wave interpolation between warm amber-gold and radiant light-gold."""
-        # 40ms interval (~25 FPS), increment 0.12 gives a smooth breath cycle in ~2.1 seconds
-        self._breath_phase += 0.12
-        factor = (math.sin(self._breath_phase) + 1.0) / 2.0
+    def _radar_tick(self):
+        """Calculates beam angle and interpolates dot brightness with trail decay."""
+        # 35ms interval (~28 FPS), advance by 0.16 rad per tick (~1.37s per full 360 deg sweep)
+        self._radar_angle = (self._radar_angle + 0.16) % (2 * math.pi)
+        trail_span = 1.25 * math.pi  # ~225 degrees trail length
         
-        r = int(190 + (255 - 190) * factor)
-        g = int(140 + (235 - 140) * factor)
-        b = int(0 + (90 - 0) * factor)
-        hex_color = f"#{r:02x}{g:02x}{b:02x}"
-        
-        self.eye_canvas.itemconfig(self.eye_circle, fill=hex_color, outline=hex_color)
-        self._breath_after_id = self.root.after(40, self._pulse_tick)
+        for dot in self.matrix_dots:
+            if dot["is_center"]:
+                # Center core dot glows bright gold as the radar axis
+                self.eye_canvas.itemconfig(dot["id"], fill="#FFD700")
+                continue
+                
+            diff = (self._radar_angle - dot["angle"]) % (2 * math.pi)
+            if diff <= trail_span:
+                factor = 1.0 - (diff / trail_span)
+                intensity = factor ** 1.3
+                
+                if intensity > 0.7:
+                    t = (intensity - 0.7) / 0.3
+                    r = 255
+                    g = int(215 + (250 - 215) * t)
+                    b = int(0 + (175 - 0) * t)
+                else:
+                    t = intensity / 0.7
+                    r = int(68 + (255 - 68) * t)
+                    g = int(46 + (215 - 46) * t)
+                    b = int(86 + (0 - 86) * t)
+                    
+                hex_color = f"#{r:02x}{g:02x}{b:02x}"
+                self.eye_canvas.itemconfig(dot["id"], fill=hex_color)
+            else:
+                self.eye_canvas.itemconfig(dot["id"], fill=self.COLOR_DOT_INACTIVE)
+                
+        self._radar_after_id = self.root.after(35, self._radar_tick)
 
-    def stop_breathing(self):
-        """Stops the breathing animation and cancels the scheduled timer."""
-        if self._breath_after_id:
+    def stop_radar(self):
+        """Stops the radar animation and cancels any scheduled timer."""
+        if self._radar_after_id:
             try:
-                self.root.after_cancel(self._breath_after_id)
+                self.root.after_cancel(self._radar_after_id)
             except Exception:
                 pass
-            self._breath_after_id = None
+            self._radar_after_id = None
 
     def setup_taskbar_style(self):
         """Applies WS_EX_TOOLWINDOW to ensure the floating widget stays hidden from the taskbar."""
@@ -381,7 +454,7 @@ class WinVoiceUI:
             play_startup_sound()
 
     def reset_to_idle(self):
-        self.stop_breathing()
+        self.stop_radar()
         self.label.config(text=self.idle_text)
         self.cancel_btn.pack_forget()
         self.set_eye_active(False)
@@ -403,7 +476,7 @@ class WinVoiceUI:
                     
                     if txt == "record":
                         self.cancel_btn.pack(side="left", padx=(10, 0))
-                        self.start_breathing()
+                        self.start_radar()
                     elif txt in ["processing", "normalization"]:
                         self.cancel_btn.pack_forget()
                         self.set_eye_active(True)
