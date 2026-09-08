@@ -103,9 +103,9 @@ class WinVoiceUI:
             
         self.make_draggable = lambda w: (w.bind("<Button-1>", start_drag, add="+"), w.bind("<B1-Motion>", do_drag, add="+"))
             
-        # --- 1. Fixed Shockwave Eye Column (32px diameter) ---
+        # --- 1. Fixed Shockwave Radar Matrix Column (32px) ---
         self.eye_frame = tk.Frame(self.root, bg=self.COLOR_BG, width=44)
-        self.eye_frame.pack(side="left", fill="y", padx=(15, 2))
+        self.eye_frame.pack(side="left", fill="y", padx=(11, 2))
         self.eye_frame.pack_propagate(False)
         
         self.eye_canvas = tk.Canvas(
