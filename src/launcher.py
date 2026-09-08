@@ -156,8 +156,11 @@ def menu():
             title_pad_n = 14
         t_pad = " " * max(0, title_pad_n)
         
+        # Break URL protocol regex with zero-width space to prevent terminal hyperlink auto-underlining
+        safe_endpoint = llm_endpoint.replace("://", ":\u200b//") if llm_endpoint else ""
+        
         if lang == "ru":
-            endpoint_display = llm_endpoint if llm_endpoint else "НЕ УСТАНОВЛЕН"
+            endpoint_display = safe_endpoint if safe_endpoint else "НЕ УСТАНОВЛЕН"
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "НЕ УСТАНОВЛЕН")
             print(f"{t_pad}{PURPLE}{BOLD}SHOCKWAVE v{version}{RESET}\n")
             print("Текущие настройки:")
@@ -173,7 +176,7 @@ def menu():
             print("6. Выход\n")
             prompt_text = "Ваш выбор (1-6): "
         else:
-            endpoint_display = llm_endpoint if llm_endpoint else "NOT SET"
+            endpoint_display = safe_endpoint if safe_endpoint else "NOT SET"
             key_display = f"{llm_key[:7]}...{llm_key[-4:]}" if len(llm_key) > 10 else (f"{llm_key[:4]}..." if llm_key else "NOT SET")
             print(f"{t_pad}{PURPLE}{BOLD}SHOCKWAVE v{version}{RESET}\n")
             print("Current Settings:")
