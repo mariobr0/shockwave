@@ -55,8 +55,10 @@ class WinVoiceApp:
         icon_path = get_resource_path(os.path.join("icons", "icon.ico"))
         self.tray = SystemTrayManager(
             icon_path=icon_path,
-            tooltip=f"Shockwave v{getattr(config, 'APP_VERSION', '0.9.6')}",
-            on_quit=self.quit_app
+            tooltip=f"Shockwave v{getattr(config, 'APP_VERSION', '1.0.0')}",
+            on_quit=self.quit_app,
+            on_show_widget=self.show_widget_topmost,
+            on_hide_widget=self.hide_widget
         )
         self.tray.start()
         
@@ -68,6 +70,14 @@ class WinVoiceApp:
         
         # Hide console window to system tray smoothly
         hide_console()
+
+    def show_widget_topmost(self):
+        """Signals UI queue to display floating widget and bring it topmost above all windows."""
+        self.q.put({"cmd": "show_topmost"})
+
+    def hide_widget(self):
+        """Signals UI queue to hide floating widget to system tray."""
+        self.q.put({"cmd": "hide_widget"})
 
     def on_toggle_wake(self, is_enabled):
         if is_enabled:

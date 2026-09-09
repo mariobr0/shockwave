@@ -5,6 +5,7 @@ import sys
 import math
 import winsound
 import ctypes
+import ctypes.wintypes as wintypes
 import config
 
 def get_resource_path(relative_path):
@@ -311,9 +312,9 @@ class WinVoiceUI:
         )
         self.chk_wake.pack(side="left")
         
-        # Close button in top-right
+        # Close button in top-right (minimizes floating widget to tray)
         def on_close(event=None):
-            self.root.quit()
+            self.root.withdraw()
             
         self.close_btn = tk.Label(self.root, text="×", bg=self.COLOR_BG, fg=self.COLOR_MUTED, font=("Segoe UI", 10, "bold"), cursor="hand2")
         self.close_btn.place(relx=1.0, rely=0.0, anchor="ne", x=-3, y=1)
@@ -434,6 +435,16 @@ class WinVoiceUI:
                 pass
             self._radar_after_id = None
 
+    def get_window_hwnd(self):
+        try:
+            wid = self.root.winfo_id()
+            hwnd = ctypes.windll.user32.GetAncestor(wid, 3)  # GA_ROOT = 3
+            if not hwnd:
+                hwnd = ctypes.windll.user32.GetParent(wid)
+            return hwnd if hwnd else wid
+        except Exception:
+            return self.root.winfo_id()
+
     def setup_taskbar_style(self):
         """Applies WS_EX_TOOLWINDOW to ensure the floating widget stays hidden from the taskbar."""
         try:
@@ -442,10 +453,7 @@ class WinVoiceUI:
             WS_EX_APPWINDOW = 0x00040000
             WS_EX_TOOLWINDOW = 0x00000080
             
-            hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
-            if hwnd == 0:
-                hwnd = self.root.winfo_id()
-                
+            hwnd = self.get_window_hwnd()
             style = ctypes.windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
             style = (style | WS_EX_TOOLWINDOW) & ~WS_EX_APPWINDOW
             ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style)
@@ -453,29 +461,39 @@ class WinVoiceUI:
         except Exception:
             pass
 
-    def enforce_topmost(self):
-        """Guarantees the window permanently stays above all other windows using native Win32 API."""
+    def enforce_topmost(self, force_foreground=False):
+        """Guarantees the window permanently stays above all other windows using 64-bit safe native Win32 API."""
         try:
-            hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
-            if not hwnd:
-                hwnd = self.root.winfo_id()
-            HWND_TOPMOST = -1
+            hwnd = self.get_window_hwnd()
+            HWND_TOPMOST = wintypes.HWND(-1)
             SWP_NOMOVE = 0x0002
             SWP_NOSIZE = 0x0001
             SWP_NOACTIVATE = 0x0010
+            SWP_SHOWWINDOW = 0x0040
+            
+            flags = SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW
+            if not force_foreground:
+                flags |= SWP_NOACTIVATE
+                
             ctypes.windll.user32.SetWindowPos(
-                hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-                SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE
+                wintypes.HWND(hwnd),
+                HWND_TOPMOST,
+                0, 0, 0, 0,
+                flags
             )
+            self.root.lift()
+            self.root.attributes("-topmost", True)
+            if force_foreground:
+                ctypes.windll.user32.SetForegroundWindow(wintypes.HWND(hwnd))
         except Exception:
             pass
 
-    def show_window(self):
-        """Displays the ready widget and plays startup quote if alert sound is enabled."""
+    def show_window(self, play_sound=True):
+        """Displays the ready widget and brings it above all windows."""
         self.root.deiconify()
         self.setup_taskbar_style()
-        self.enforce_topmost()
-        if self.alert_enabled:
+        self.enforce_topmost(force_foreground=True)
+        if play_sound and self.alert_enabled:
             play_startup_sound()
 
     def reset_to_idle(self):
@@ -525,6 +543,15 @@ class WinVoiceUI:
                     # Return to idle text after 5 seconds
                     self.reset_id = self.root.after(5000, self.reset_to_idle)
                     
+                elif cmd == "show_topmost":
+                    self.show_window(play_sound=False)
+                elif cmd == "hide_widget":
+                    self.root.withdraw()
+                elif cmd == "toggle_widget":
+                    if self.root.winfo_viewable():
+                        self.root.withdraw()
+                    else:
+                        self.show_window(play_sound=False)
                 elif cmd == "quit":
                     self.root.quit()
                     return
