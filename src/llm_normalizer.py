@@ -49,6 +49,21 @@ class LLMNormalizer:
             data = response.json()
             normalized = data.get("choices", [{}])[0].get("message", {}).get("content", "")
             if normalized and normalized.strip():
+                # Guardrail: detect provider warning/error messages returned under HTTP 200
+                suspicious_phrases = [
+                    "is no longer available",
+                    "please switch to",
+                    "model is deprecated",
+                    "model not found"
+                ]
+                lower_norm = normalized.lower()
+                lower_orig = text.lower()
+                detected = next((p for p in suspicious_phrases if p in lower_norm and p not in lower_orig), None)
+                if detected:
+                    clean_msg = normalized.replace("\n", " ").strip()[:90]
+                    print(f"{red}Failed (Provider: {clean_msg}){reset}")
+                    return text
+                    
                 print("Success")
                 return normalized.strip()
             else:
