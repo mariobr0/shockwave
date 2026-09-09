@@ -3,23 +3,47 @@ import sys
 import configparser
 from dotenv import load_dotenv
 
-# 1. Load .env from current directory or project root (for secrets & API keys)
-env_path = ".env" if os.path.exists(".env") else os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
+def _find_file(filename: str) -> str:
+    """Finds an existing configuration file with priority:
+    1. Current working directory (cwd)
+    2. Next to executable (if frozen)
+    3. Parent directory of executable (if running from dist/)
+    4. Project root directory
+    """
+    candidates = [os.path.abspath(filename)]
+    if getattr(sys, 'frozen', False):
+        exe_dir = os.path.dirname(sys.executable)
+        candidates.append(os.path.join(exe_dir, filename))
+        candidates.append(os.path.abspath(os.path.join(exe_dir, "..", filename)))
+    else:
+        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        candidates.append(os.path.join(root_dir, filename))
+    
+    for path in candidates:
+        if os.path.exists(path):
+            return path
+    return candidates[0]
+
+# 1. Load .env (for secrets & API keys)
+env_path = _find_file(".env")
 load_dotenv(env_path)
 
-# 2. Path to local models directory in project root
+# 2. Path to local models directory, config.ini, and glossary
 if getattr(sys, 'frozen', False):
     exe_dir = os.path.dirname(sys.executable)
-    if os.path.exists(os.path.join(exe_dir, "models")):
+    if os.path.exists(os.path.abspath("models")):
+        MODELS_DIR = os.path.abspath("models")
+    elif os.path.exists(os.path.join(exe_dir, "models")):
         MODELS_DIR = os.path.join(exe_dir, "models")
-    else:
+    elif os.path.exists(os.path.abspath(os.path.join(exe_dir, "..", "models"))):
         MODELS_DIR = os.path.abspath(os.path.join(exe_dir, "..", "models"))
-    CONFIG_INI_PATH = os.path.join(exe_dir, "config.ini")
-    GLOSSARY_PATH = os.path.join(exe_dir, "glossary.txt")
+    else:
+        MODELS_DIR = os.path.join(exe_dir, "models")
 else:
     MODELS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "models"))
-    CONFIG_INI_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "config.ini"))
-    GLOSSARY_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "glossary.txt"))
+
+CONFIG_INI_PATH = _find_file("config.ini")
+GLOSSARY_PATH = _find_file("glossary.txt")
 
 os.makedirs(MODELS_DIR, exist_ok=True)
 WHISPER_DIR = os.path.join(MODELS_DIR, "whisper")
