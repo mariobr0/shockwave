@@ -70,9 +70,10 @@ class WinVoiceUI:
         except Exception:
             pass
         
-        # Configurable opacity from .env (default 0.80)
-        opacity = getattr(config, "UI_OPACITY", 0.80)
+        # Configurable opacity from config.ini / .env
+        opacity = getattr(config, "UI_OPACITY", 0.85)
         self.root.attributes("-alpha", opacity)
+        self.startup_sound_enabled = getattr(config, "STARTUP_SOUND", True)
         
         # Shockwave deep royal purple palette (configurable via .env)
         self.COLOR_BG = getattr(config, "UI_BG_COLOR", "#3b274d")
@@ -561,7 +562,7 @@ class WinVoiceUI:
         self.root.deiconify()
         self.setup_taskbar_style()
         self.enforce_topmost(force_foreground=True)
-        if play_sound and self.alert_enabled:
+        if play_sound and self.startup_sound_enabled:
             play_startup_sound()
 
     def reset_to_idle(self):

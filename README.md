@@ -31,7 +31,8 @@
 * **Draggable Floating Widget:** Minimalist on-screen overlay that can be smoothly repositioned across any screen using the left grip handle (`⋮⋮`).
 * **Permanent Taskbar Presence:** Clean window lifecycle with permanent icon visibility on Windows Taskbar and smooth flicker-free startup.
 * **Bilingual Interactive Launcher:** Console control panel supporting language switching (English / Russian), model management, wake word configuration, and transparent API setup.
-* **Audio Notifications:** Distinct sound chime plays when recording begins, and when transcription is copied and ready.
+* **Safe Configuration Separation:** All UI settings, hotkeys, sounds, and prompt overrides are stored cleanly in `config.ini`, while private API keys remain securely isolated in `.env` (gitignored).
+* **Audio Notifications & Startup Sound:** Distinct sound chime plays when transcription is copied and ready. The Megatron startup voice chime can be toggled independently via `startup_sound` in `config.ini`.
 * **Safe Terminal Logging:** The console maintains a real-time transcript history to ensure no dictated text is lost.
 
 ## Documentation & Installation
@@ -69,7 +70,8 @@ Detailed guides are available below:
 * **Перемещаемый виджет:** Аккуратная плашка статуса, которую можно свободно перетаскивать мышкой за левую ручку (`⋮⋮`) в любое место любого экрана.
 * **Постоянная иконка в таскбаре:** Плавный запуск без мерцаний и постоянное отображение иконки приложения на панели задач Windows.
 * **Двуязычная панель управления:** Консольный лаунчер с поддержкой переключения языка (RU / EN), проверки моделей, смены кодового слова и настройки API.
-* **Звуковой сигнал:** Отдельные аккуратные сигналы при старте записи по слову и при завершении диктовки.
+* **Чёткое разделение настроек:** Все пользовательские параметры (горячие клавиши, цвета, начальные состояния кнопок, звуки) хранятся в удобном файле `config.ini`, а секретные ключи API изолированы в `.env` (защищённом от Git).
+* **Гибкая настройка звука:** Приветствие Мегатрона при старте можно независимо отключить параметром `startup_sound = false` в `config.ini`, сохранив приятные сигналы готовности текста.
 * **Бекап-лог:** Консоль сохраняет лог и всю историю расшифровок в рамках открытой сессии.
 
 ## Документация и Установка

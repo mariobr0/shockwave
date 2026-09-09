@@ -1,0 +1,43 @@
+# =====================================================================
+# Shockwave Configuration File (config.ini.example)
+# Rename this file to config.ini to customize your settings.
+# =====================================================================
+
+[Sound]
+startup_sound = true
+alert_sound = true
+
+[Interface]
+hotkey = ctrl+space
+position = bottom-right
+opacity = 0.85
+language = ru
+
+[Recognition]
+engine = gigaam
+whisper_model = large-v3-turbo
+whisper_language = ru
+gigaam_model = gigaam-v3-e2e-rnnt
+gigaam_quantization = int8
+wake_word_enabled = true
+wake_word = мега
+
+[Toggles]
+llm_norm = false
+ai_task = false
+to_en = false
+clip_prepend = false
+
+[Theme]
+ui_bg_color = #3b274d
+ui_grip_color = #2c1c3b
+cli_title_color = #B45FEB
+cli_quote_color = #807785
+cli_banner_pad = 3
+cli_quote_pad = 6
+cli_title_pad = 0
+
+[Prompts]
+translate_en = 
+ai_task = 
+ai_task_en = 

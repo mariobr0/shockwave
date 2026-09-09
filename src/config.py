@@ -1,92 +1,121 @@
 import os
 import sys
+import configparser
 from dotenv import load_dotenv
 
-# Load .env from current directory or project root
+# 1. Load .env from current directory or project root (for secrets & API keys)
 env_path = ".env" if os.path.exists(".env") else os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".env"))
 load_dotenv(env_path)
 
-# Path to local models directory in project root
+# 2. Path to local models directory in project root
 if getattr(sys, 'frozen', False):
     exe_dir = os.path.dirname(sys.executable)
     if os.path.exists(os.path.join(exe_dir, "models")):
         MODELS_DIR = os.path.join(exe_dir, "models")
     else:
         MODELS_DIR = os.path.abspath(os.path.join(exe_dir, "..", "models"))
+    CONFIG_INI_PATH = os.path.join(exe_dir, "config.ini")
+    GLOSSARY_PATH = os.path.join(exe_dir, "glossary.txt")
 else:
     MODELS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "models"))
+    CONFIG_INI_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "config.ini"))
+    GLOSSARY_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "glossary.txt"))
 
 os.makedirs(MODELS_DIR, exist_ok=True)
 WHISPER_DIR = os.path.join(MODELS_DIR, "whisper")
 GIGAAM_DIR = os.path.join(MODELS_DIR, "gigaam")
 VOSK_DIR = os.path.join(MODELS_DIR, "vosk-model-small-ru")
-VOSK_MODEL_PATH = os.getenv("VOSK_MODEL_PATH", VOSK_DIR)
-VOSK_MODEL_URL = os.getenv("VOSK_MODEL_URL", "https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip")
-GLOSSARY_PATH = os.path.join(os.path.dirname(MODELS_DIR), "glossary.txt") if getattr(sys, 'frozen', False) else os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "glossary.txt"))
 
 os.environ["HF_HOME"] = MODELS_DIR
 os.environ["HF_HUB_CACHE"] = MODELS_DIR
 
-STT_ENGINE = os.getenv("STT_ENGINE", "whisper")
-WHISPER_MODEL = os.getenv("WHISPER_MODEL", "large-v3-turbo")
+# 3. Load config.ini (user preferences, UI layout, themes, toggles)
+ini_parser = configparser.ConfigParser()
+if os.path.exists(CONFIG_INI_PATH):
+    try:
+        ini_parser.read(CONFIG_INI_PATH, encoding="utf-8")
+    except Exception as e:
+        print(f"[Config] Warning reading config.ini: {e}")
+
+def get_setting(section: str, option: str, env_var: str = None, default: str = "") -> str:
+    """Reads setting with priority: config.ini -> environment / .env -> default."""
+    if section and option and ini_parser.has_section(section) and ini_parser.has_option(section, option):
+        val = ini_parser.get(section, option).strip()
+        if val != "":
+            return val
+    if env_var:
+        env_val = os.getenv(env_var)
+        if env_val is not None and env_val.strip() != "":
+            return env_val.strip()
+    return default
+
+def get_bool(section: str, option: str, env_var: str = None, default: bool = False) -> bool:
+    val = get_setting(section, option, env_var, str(default)).strip().lower()
+    return val in ["true", "1", "yes", "on"]
+
+def get_int(section: str, option: str, env_var: str = None, default: int = 0) -> int:
+    try:
+        return int(get_setting(section, option, env_var, str(default)))
+    except (ValueError, TypeError):
+        return default
+
+def get_float(section: str, option: str, env_var: str = None, default: float = 0.0) -> float:
+    try:
+        return float(get_setting(section, option, env_var, str(default)))
+    except (ValueError, TypeError):
+        return default
+
+# --- Sound Settings ---
+STARTUP_SOUND = get_bool("Sound", "startup_sound", "STARTUP_SOUND", default=True)
+ALERT_SOUND = get_bool("Sound", "alert_sound", "ALERT_SOUND", default=True)
+
+# --- Speech Recognition (STT) Settings ---
+STT_ENGINE = get_setting("Recognition", "engine", "STT_ENGINE", default="gigaam")
+WHISPER_MODEL = get_setting("Recognition", "whisper_model", "WHISPER_MODEL", default="large-v3-turbo")
 WHISPER_MODEL_PATH = os.getenv("WHISPER_MODEL_PATH", "")
-WHISPER_LANGUAGE = os.getenv("WHISPER_LANGUAGE", "ru")
+WHISPER_LANGUAGE = get_setting("Recognition", "whisper_language", "WHISPER_LANGUAGE", default="ru")
 
-GIGAAM_MODEL = os.getenv("GIGAAM_MODEL", "gigaam-v3-e2e-rnnt")
+GIGAAM_MODEL = get_setting("Recognition", "gigaam_model", "GIGAAM_MODEL", default="gigaam-v3-e2e-rnnt")
 GIGAAM_MODEL_PATH = os.getenv("GIGAAM_MODEL_PATH", "")
-GIGAAM_QUANTIZATION = os.getenv("GIGAAM_QUANTIZATION", "int8")
+GIGAAM_QUANTIZATION = get_setting("Recognition", "gigaam_quantization", "GIGAAM_QUANTIZATION", default="int8")
 
-APP_LANGUAGE = os.getenv("APP_LANGUAGE", "en")
+WAKE_WORD_ENABLED = get_bool("Recognition", "wake_word_enabled", "WAKE_WORD_ENABLED", default=True)
+WAKE_WORD = get_setting("Recognition", "wake_word", "WAKE_WORD", default="мега")
+VOSK_MODEL_PATH = os.getenv("VOSK_MODEL_PATH", VOSK_DIR)
+VOSK_MODEL_URL = os.getenv("VOSK_MODEL_URL", "https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip")
+
+# --- Interface & Hotkeys ---
+APP_LANGUAGE = get_setting("Interface", "language", "APP_LANGUAGE", default="ru")
 APP_VERSION = "1.0.0"
+HOTKEY = get_setting("Interface", "hotkey", "HOTKEY", default="ctrl+space")
+UI_POSITION = get_setting("Interface", "position", "UI_POSITION", default="bottom-right")
+UI_OPACITY = get_float("Interface", "opacity", "UI_OPACITY", default=0.85)
 
+# --- Widget Checkbox Initial Toggles ---
+LLM_NORM = get_bool("Toggles", "llm_norm", "LLM_NORM", default=False)
+AI_TASK_MODE = get_bool("Toggles", "ai_task", "AI_TASK_MODE", default=False)
+TRANSLATE_EN = get_bool("Toggles", "to_en", "TRANSLATE_EN", default=False)
+CLIP_PREPEND = get_bool("Toggles", "clip_prepend", "CLIP_PREPEND", default=False)
+
+# --- LLM Endpoint & Secrets (Always from .env) ---
 LLM_ENDPOINT = os.getenv("LLM_ENDPOINT", "")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")
-LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash-lite")
-try:
-    LLM_TIMEOUT = int(os.getenv("LLM_TIMEOUT", "25"))
-except (ValueError, TypeError):
-    LLM_TIMEOUT = 25
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash")
+LLM_TIMEOUT = get_int("LLM", "timeout", "LLM_TIMEOUT", default=25)
 
-HOTKEY = os.getenv("HOTKEY", "ctrl+space")
-UI_POSITION = os.getenv("UI_POSITION", "bottom-left")
+# --- Theme & Colors (HEX) ---
+UI_BG_COLOR = get_setting("Theme", "ui_bg_color", "UI_BG_COLOR", default="#3b274d")
+UI_GRIP_COLOR = get_setting("Theme", "ui_grip_color", "UI_GRIP_COLOR", default="#2c1c3b")
+CLI_TITLE_COLOR = get_setting("Theme", "cli_title_color", "CLI_TITLE_COLOR", default="#B45FEB")
+CLI_QUOTE_COLOR = get_setting("Theme", "cli_quote_color", "CLI_QUOTE_COLOR", default="#807785")
 
-LLM_NORM = os.getenv("LLM_NORM", "false").strip().lower() in ["true", "1", "yes"]
-ALERT_SOUND = os.getenv("ALERT_SOUND", "true").strip().lower() in ["true", "1", "yes"]
-WAKE_WORD_ENABLED = os.getenv("WAKE_WORD_ENABLED", "true").strip().lower() in ["true", "1", "yes"]
-WAKE_WORD = os.getenv("WAKE_WORD", "мегатрон")
-CLIP_PREPEND = os.getenv("CLIP_PREPEND", "false").strip().lower() in ["true", "1", "yes"]
-AI_TASK_MODE = os.getenv("AI_TASK_MODE", "false").strip().lower() in ["true", "1", "yes"]
-TRANSLATE_EN = os.getenv("TRANSLATE_EN", "false").strip().lower() in ["true", "1", "yes"]
-try:
-    UI_OPACITY = float(os.getenv("UI_OPACITY", "0.80"))
-except (ValueError, TypeError):
-    UI_OPACITY = 0.80
-
-# Theme & Palette Customization (HEX Colors)
-CLI_QUOTE_COLOR = os.getenv("CLI_QUOTE_COLOR", "#514757")
-CLI_TITLE_COLOR = os.getenv("CLI_TITLE_COLOR", "#B45FEB")
-UI_BG_COLOR = os.getenv("UI_BG_COLOR", "#3b274d")
-UI_GRIP_COLOR = os.getenv("UI_GRIP_COLOR", "#2c1c3b")
-
-# CLI Alignment & Left Margins (Number of spaces)
-try:
-    CLI_BANNER_PAD = int(os.getenv("CLI_BANNER_PAD", "3"))
-except (ValueError, TypeError):
-    CLI_BANNER_PAD = 3
-
-try:
-    CLI_QUOTE_PAD = int(os.getenv("CLI_QUOTE_PAD", "6"))
-except (ValueError, TypeError):
-    CLI_QUOTE_PAD = 6
-
-try:
-    CLI_TITLE_PAD = int(os.getenv("CLI_TITLE_PAD", "14"))
-except (ValueError, TypeError):
-    CLI_TITLE_PAD = 14
+CLI_BANNER_PAD = get_int("Theme", "cli_banner_pad", "CLI_BANNER_PAD", default=3)
+CLI_QUOTE_PAD = get_int("Theme", "cli_quote_pad", "CLI_QUOTE_PAD", default=6)
+CLI_TITLE_PAD = get_int("Theme", "cli_title_pad", "CLI_TITLE_PAD", default=0)
 
 AUDIO_TEMP_FILE = "temp_audio.wav"
 
-# System prompt for transcript normalization and punctuation restoration
+# --- Default System Prompts ---
 STT_SYSTEM_PROMPT = """You are a high-precision punctuation, formatting, and typo-correction module for speech recognition.
 Your SOLE task is to take the raw voice transcript and return it cleanly formatted and punctuated.
 
@@ -132,6 +161,7 @@ CRITICAL RULES:
 5. Return EXCLUSIVELY the final English prompt. No preamble, greetings, or meta-commentary.
 """
 
-LLM_PROMPT_TRANSLATE_EN = os.getenv("LLM_PROMPT_TRANSLATE_EN", DEFAULT_TRANSLATE_EN_PROMPT)
-LLM_PROMPT_AI_TASK = os.getenv("LLM_PROMPT_AI_TASK", DEFAULT_AI_TASK_PROMPT)
-LLM_PROMPT_AI_TASK_EN = os.getenv("LLM_PROMPT_AI_TASK_EN", DEFAULT_AI_TASK_EN_PROMPT)
+# Customizable prompts (reads from config.ini [Prompts], then .env, then defaults)
+LLM_PROMPT_TRANSLATE_EN = get_setting("Prompts", "translate_en", "LLM_PROMPT_TRANSLATE_EN", default=DEFAULT_TRANSLATE_EN_PROMPT)
+LLM_PROMPT_AI_TASK = get_setting("Prompts", "ai_task", "LLM_PROMPT_AI_TASK", default=DEFAULT_AI_TASK_PROMPT)
+LLM_PROMPT_AI_TASK_EN = get_setting("Prompts", "ai_task_en", "LLM_PROMPT_AI_TASK_EN", default=DEFAULT_AI_TASK_EN_PROMPT)
