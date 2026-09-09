@@ -107,7 +107,7 @@ class WinVoiceUI:
             
         # --- 1. Fixed Shockwave Radar Matrix Column (32px) ---
         self.eye_frame = tk.Frame(self.root, bg=self.COLOR_BG, width=44)
-        self.eye_frame.pack(side="left", fill="y", padx=(1, 2))
+        self.eye_frame.pack(side="left", fill="y", padx=(11, 2))
         self.eye_frame.pack_propagate(False)
         
         self.eye_canvas = tk.Canvas(
@@ -349,7 +349,7 @@ class WinVoiceUI:
             
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        width = 275
+        width = 255
         height = 80
         
         if position == "bottom-right":
