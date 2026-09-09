@@ -124,7 +124,7 @@ class WinVoiceApp:
 
     def start_recording_thread(self):
         start_time = datetime.now().strftime("%H:%M:%S")
-        purple_start = "\033[38;2;59;47;83m\033[1mStarted recording\033[0m"
+        purple_start = "\033[38;2;180;95;235m\033[1mStarted recording\033[0m"
         print(f"\n{purple_start} {start_time}. ", end="", flush=True)
         self.q.put({"cmd": "show", "text": "record"})
         self.audio.start_recording()
