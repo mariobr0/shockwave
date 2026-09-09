@@ -34,13 +34,26 @@ ini_parser = configparser.ConfigParser()
 if os.path.exists(CONFIG_INI_PATH):
     try:
         ini_parser.read(CONFIG_INI_PATH, encoding="utf-8")
+    except configparser.MissingSectionHeaderError:
+        # Fallback: if user omits section headers, wrap in [DEFAULT]
+        try:
+            with open(CONFIG_INI_PATH, "r", encoding="utf-8") as f:
+                content = f.read()
+            ini_parser.read_string("[DEFAULT]\n" + content)
+        except Exception as e:
+            print(f"[Config] Warning parsing fallback config.ini: {e}")
     except Exception as e:
         print(f"[Config] Warning reading config.ini: {e}")
 
 def get_setting(section: str, option: str, env_var: str = None, default: str = "") -> str:
-    """Reads setting with priority: config.ini -> environment / .env -> default."""
+    """Reads setting with priority: config.ini [section] -> config.ini [DEFAULT] -> environment / .env -> default."""
     if section and option and ini_parser.has_section(section) and ini_parser.has_option(section, option):
         val = ini_parser.get(section, option).strip()
+        if val != "":
+            return val
+    # Fallback to DEFAULT section if user wrote a flat config file
+    if option and ini_parser.has_option("DEFAULT", option):
+        val = ini_parser.get("DEFAULT", option).strip()
         if val != "":
             return val
     if env_var:
@@ -67,7 +80,7 @@ def get_float(section: str, option: str, env_var: str = None, default: float = 0
 
 # --- Sound Settings ---
 STARTUP_SOUND = get_bool("Sound", "startup_sound", "STARTUP_SOUND", default=True)
-ALERT_SOUND = get_bool("Sound", "alert_sound", "ALERT_SOUND", default=True)
+ALERT_SOUND = get_bool("Toggles", "alert_sound", "ALERT_SOUND", default=get_bool("Sound", "alert_sound", "ALERT_SOUND", default=True))
 
 # --- Speech Recognition (STT) Settings ---
 STT_ENGINE = get_setting("Recognition", "engine", "STT_ENGINE", default="gigaam")
@@ -79,7 +92,7 @@ GIGAAM_MODEL = get_setting("Recognition", "gigaam_model", "GIGAAM_MODEL", defaul
 GIGAAM_MODEL_PATH = os.getenv("GIGAAM_MODEL_PATH", "")
 GIGAAM_QUANTIZATION = get_setting("Recognition", "gigaam_quantization", "GIGAAM_QUANTIZATION", default="int8")
 
-WAKE_WORD_ENABLED = get_bool("Recognition", "wake_word_enabled", "WAKE_WORD_ENABLED", default=True)
+WAKE_WORD_ENABLED = get_bool("Toggles", "wake", "WAKE_WORD_ENABLED", default=get_bool("Recognition", "wake_word_enabled", "WAKE_WORD_ENABLED", default=True))
 WAKE_WORD = get_setting("Recognition", "wake_word", "WAKE_WORD", default="мега")
 VOSK_MODEL_PATH = os.getenv("VOSK_MODEL_PATH", VOSK_DIR)
 VOSK_MODEL_URL = os.getenv("VOSK_MODEL_URL", "https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip")
