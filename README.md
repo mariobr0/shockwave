@@ -20,7 +20,10 @@
 * **Hands-Free Wake Word (Vosk):** Fully voice-driven recording. Say your wake word (default: *"Мегатрон"*) to start recording, and say it again to stop. The keyword is automatically trimmed from the end of the audio. Wake word is fully customizable in the launcher settings!
 * **Rock-Solid System Hotkey:** Native Win32 `RegisterHotKey` (Default `Ctrl + Space`). Never drops out after system sleep, lock screen, or long background sessions.
 * **Dynamic Dot-Matrix Radar:** Sleek 32×32 px square button with a 5×5 LED micro-pixel matrix featuring a real-time rotating radar sweep and glowing trail during active recording. Click-to-record supported!
-* **Widget Quick Toggles:** Floating toolbar switches arranged in two rows for instant toggling of `wake` listening, `LLM norm`, audio chimes (`alert`), and smart clipboard prepend (`clip+`).
+* **Widget Quick Toggles:** Floating toolbar switches arranged in a 2-row × 3-column grid (`LLM norm`, `AI task`, `to EN`, `wake`, `alert`, `clip+`).
+* **AI Task Prompt Generator (`AI task`):** Transforms conversational stream-of-consciousness speech into structured, crystal-clear instructions/prompts for LLMs without chit-chat or filler words.
+* **Instant English Translation (`to EN`):** Translates dictated speech directly into natural English with technical term preservation and punctuation restoration.
+* **Combined Super-Mode (`AI task` + `to EN`):** When both toggles are enabled, automatically generates structured, production-ready AI directives in English from spoken Russian!
 * **Smart Clipboard Prepend (`clip+`):** When enabled, Shockwave prepends your dictated prompt above existing clipboard content (e.g. copied code, errors, or data) with clean double-newline spacing (`Ctrl+V` pastes the full combined prompt!).
 * **User Glossary (`glossary.txt`):** Instant dictionary word substitutions immediately after speech recognition. Fully customizable for tech stack, trading terms, or brand names, with hot-reloading on the fly without restarting Shockwave.
 * **Dual Speech-to-Text (STT):** Choose between Whisper (mixed IT speech) and GigaAM (ultra-fast Russian speech).
@@ -55,7 +58,10 @@ Detailed guides are available below:
 * **Голосовая активация без рук (Hands-Free на базе Vosk):** Управляйте записью только голосом. Произнесите кодовое слово (по умолчанию *«Мегатрон»*) для старта, и повторите его для завершения. Стоп-слово автоматически вырезается из конца записи. Кодовое слово можно свободно сменить в меню лаунчера!
 * **Надёжная системная горячая клавиша:** Работает через ядро Windows (`RegisterHotKey`, по умолчанию `Ctrl + Space`). Никогда не отваливается после сна или блокировки экрана.
 * **Интерактивный матричный радар (Dot-Matrix Radar):** Стильная кнопка 32×32 px со светодиодной матрицей 5×5 пикселей и плавной 28 FPS анимацией вращающегося луча радара во время записи. Поддерживает запуск диктовки кликом мыши!
-* **Быстрые тумблеры на виджете:** Удобное двухрядное управление прямо на плавающей панели: переключатели `wake` (голосовая активация), `LLM norm` (нормализация текста нейросетью), `alert` (звуковые сигналы) и `clip+` (умное дополнение буфера).
+* **Быстрые тумблеры на виджете:** Удобная сетка переключателей в 2 ряда по 3 кнопки: `LLM norm`, `AI task`, `to EN`, `wake`, `alert` и `clip+`.
+* **Генератор инструкций для AI (`AI task`):** Превращает устный поток мыслей в чёткие, структурированные промпты для нейросетей без лишних разговорных междометий и слов-паразитов.
+* **Мгновенный перевод на английский (`to EN`):** Переводит надиктованную речь на естественный английский язык с сохранением технической терминологии и знаков препинания.
+* **Супер-режим (`AI task` + `to EN`):** При одновременном включении обоих чекбоксов Shockwave формирует профессиональный англоязычный промпт для AI прямо из русской устной речи!
 * **Умное дополнение буфера (`clip+`):** Если включен тумблер `clip+` и в буфере уже скопирован фрагмент кода или текст, Shockwave вставит надиктованный промпт над содержимым буфера через две пустые строки (по `Ctrl+V` сразу вставляется готовый запрос с контекстом!).
 * **Пользовательский словарь (`glossary.txt`):** Мгновенная замена специфических терминов и названий прямо после распознавания. Поддерживает редактирование на лету без перезапуска программы.
 * **Два движка распознавания (STT):** Быстрый выбор между Whisper (для смешанной IT-речи) и GigaAM (очень быстрый для русской речи).

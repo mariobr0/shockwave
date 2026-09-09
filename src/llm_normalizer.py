@@ -2,7 +2,7 @@ import requests
 import config
 
 class LLMNormalizer:
-    def normalize(self, text):
+    def normalize(self, text, translate_en=False, ai_task=False):
         if not text:
             return ""
             
@@ -19,20 +19,34 @@ class LLMNormalizer:
         if config.LLM_API_KEY:
             headers["Authorization"] = f"Bearer {config.LLM_API_KEY}"
             
-        user_prompt = f"Raw transcript to punctuate and format (return ONLY the corrected text):\n{text}"
+        user_prompt = f"Raw transcript to process:\n{text}"
+        
+        # Select active system prompt & status message based on mode toggles
+        if translate_en and ai_task:
+            system_prompt = getattr(config, "LLM_PROMPT_AI_TASK_EN", config.DEFAULT_AI_TASK_EN_PROMPT)
+            action_name = "Generating AI task (EN)"
+        elif ai_task:
+            system_prompt = getattr(config, "LLM_PROMPT_AI_TASK", config.DEFAULT_AI_TASK_PROMPT)
+            action_name = "Generating AI task"
+        elif translate_en:
+            system_prompt = getattr(config, "LLM_PROMPT_TRANSLATE_EN", config.DEFAULT_TRANSLATE_EN_PROMPT)
+            action_name = "Translating to EN"
+        else:
+            system_prompt = config.STT_SYSTEM_PROMPT
+            action_name = "Normalizing"
         
         model_name = getattr(config, "LLM_MODEL", "gemini-2.5-flash-lite")
         payload = {
             "model": model_name,
             "messages": [
-                {"role": "system", "content": config.STT_SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
             "max_tokens": 1024,
             "temperature": 0.1
         }
         
-        print(f"Normalizing with {model_name}... ", end="", flush=True)
+        print(f"{action_name} with {model_name}... ", end="", flush=True)
         
         timeout_sec = getattr(config, "LLM_TIMEOUT", 25)
         try:

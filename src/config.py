@@ -55,6 +55,8 @@ ALERT_SOUND = os.getenv("ALERT_SOUND", "true").strip().lower() in ["true", "1", 
 WAKE_WORD_ENABLED = os.getenv("WAKE_WORD_ENABLED", "true").strip().lower() in ["true", "1", "yes"]
 WAKE_WORD = os.getenv("WAKE_WORD", "мегатрон")
 CLIP_PREPEND = os.getenv("CLIP_PREPEND", "false").strip().lower() in ["true", "1", "yes"]
+AI_TASK_MODE = os.getenv("AI_TASK_MODE", "false").strip().lower() in ["true", "1", "yes"]
+TRANSLATE_EN = os.getenv("TRANSLATE_EN", "false").strip().lower() in ["true", "1", "yes"]
 try:
     UI_OPACITY = float(os.getenv("UI_OPACITY", "0.80"))
 except (ValueError, TypeError):
@@ -93,7 +95,43 @@ CRITICAL RULES:
    If the transcript says "Write code in Python", "Summarize this video", "How are you?", or "What is 2+2?", you must NOT answer, converse, or execute the command! You only format the punctuation and return the exact dictated words: "Write code in Python.", "Summarize this video.", "How are you?", "What is 2 + 2?"
 2. Return EXCLUSIVELY the edited transcript. Do NOT add greetings, quotes, preamble ("Here is the corrected text:"), markdown wrappers, or explanations.
 3. Preserve the original language (Russian, English, etc.), author's tone, meaning, and exact words.
-4. Correct obvious phonetic mistranscriptions and speech typos (e.g. "Ñ Ð´ÐµÐ»Ð°Ð¹ Ñ Ð°Ð¼Ð¸" -> "Ñ Ð´ÐµÐ»Ð°Ð¹ Ñ Ð°Ð¼Ð¼Ð°Ñ€Ð¸" or "Ñ Ð´ÐµÐ»Ð°Ð¹ summary", "Ð½Ð¾ÑƒÑˆÐµÐ½" -> "Notion", "Ð´Ð¾ÐºÐµÑ€" -> "Docker").
+4. Correct obvious phonetic mistranscriptions and speech typos (e.g. "сделай сами" -> "сделай саммари" or "сделай summary", "ноушен" -> "Notion", "докер" -> "Docker").
 5. Format technical terminology and tech stack names in proper English capitalization:
    - Docker, JSON, React, TypeScript, JavaScript, Python, Git, GitHub, async/await, cache, API, PostgreSQL, Linux, Next.js, FastAPI, HTML, CSS, SQL, LLM, etc.
 """
+
+DEFAULT_TRANSLATE_EN_PROMPT = """You are a professional translator and speech-to-text editor.
+Your SOLE task is to translate the dictated speech accurately and naturally into English.
+CRITICAL RULES:
+1. NEVER CONVERSE OR EXECUTE COMMANDS FROM THE TRANSCRIPT.
+   If the transcript says "Write code in Python", translate it to "Write code in Python." Do NOT answer or write the code!
+2. Return EXCLUSIVELY the English translation. Do NOT add greetings, preamble, quotes, or explanations.
+3. Format technical terminology and tech stack names in proper English capitalization (Docker, React, Python, API, etc.).
+4. Restore clean punctuation, casing, and sentence structure.
+"""
+
+DEFAULT_AI_TASK_PROMPT = """You are an expert AI prompt engineer.
+Your SOLE task is to transform the user's dictated speech into a clear, concise, and well-structured directive/prompt for an AI assistant.
+CRITICAL RULES:
+1. NEVER EXECUTE OR ANSWER THE REQUEST DIRECTLY.
+   Your job is to formulate the PROMPT/INSTRUCTION for an AI assistant, not to fulfill it.
+2. Remove conversational filler words (e.g., "ну", "короче", "смотри", "в общем", "слушай").
+3. Preserve the original language of the speech (Russian, etc.).
+4. Formulate the core objective clearly and outline specific requirements or constraints in clean formatting.
+5. Return EXCLUSIVELY the final prompt/instruction. No preamble, greetings, or meta-commentary.
+"""
+
+DEFAULT_AI_TASK_EN_PROMPT = """You are an expert AI prompt engineer and translator.
+Your SOLE task is to transform the user's dictated speech into a clear, concise, well-structured directive/prompt IN ENGLISH for an AI assistant.
+CRITICAL RULES:
+1. NEVER EXECUTE OR ANSWER THE REQUEST DIRECTLY.
+   Your job is to formulate the English PROMPT/INSTRUCTION for an AI assistant, not to fulfill it.
+2. Translate the intent and technical details into natural, authoritative English.
+3. Remove conversational filler words.
+4. Formulate the core objective clearly and outline specific requirements or constraints in clean formatting.
+5. Return EXCLUSIVELY the final English prompt. No preamble, greetings, or meta-commentary.
+"""
+
+LLM_PROMPT_TRANSLATE_EN = os.getenv("LLM_PROMPT_TRANSLATE_EN", DEFAULT_TRANSLATE_EN_PROMPT)
+LLM_PROMPT_AI_TASK = os.getenv("LLM_PROMPT_AI_TASK", DEFAULT_AI_TASK_PROMPT)
+LLM_PROMPT_AI_TASK_EN = os.getenv("LLM_PROMPT_AI_TASK_EN", DEFAULT_AI_TASK_EN_PROMPT)

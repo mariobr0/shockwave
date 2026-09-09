@@ -240,11 +240,12 @@ class WinVoiceUI:
         self.cancel_btn.bind("<Enter>", on_cancel_enter)
         self.cancel_btn.bind("<Leave>", on_cancel_leave)
         
-        # Checkbox controls container (two-row grid)
+        # Checkbox controls container (two-row x three-column grid)
         self.controls_frame = tk.Frame(self.right_frame, bg=self.COLOR_BG)
         self.controls_frame.pack(fill="x", pady=(1, 0))
         
-        # Row 0, Col 0: LLM norm checkbox (initial value from .env LLM_NORM)
+        # --- Column 0 ---
+        # Row 0, Col 0: LLM norm checkbox
         self.llm_enabled = getattr(config, "LLM_NORM", False)
         def toggle_llm():
             self.llm_enabled = self.use_llm_var.get()
@@ -264,31 +265,9 @@ class WinVoiceUI:
             cursor="hand2",
             padx=0
         )
-        self.chk_llm.grid(row=0, column=0, sticky="w", padx=(0, 10), pady=(0, 2))
-        
-        # Row 0, Col 1: Alert sound checkbox (initial value from .env ALERT_SOUND)
-        self.alert_enabled = getattr(config, "ALERT_SOUND", True)
-        def toggle_alert():
-            self.alert_enabled = self.use_alert_var.get()
-            
-        self.use_alert_var = tk.BooleanVar(value=self.alert_enabled)
-        self.chk_alert = tk.Checkbutton(
-            self.controls_frame,
-            text="alert",
-            variable=self.use_alert_var,
-            command=toggle_alert,
-            bg=self.COLOR_BG,
-            fg=self.COLOR_MUTED,
-            selectcolor=self.COLOR_GRIP,
-            activebackground=self.COLOR_BG,
-            activeforeground="#ffffff",
-            font=("Segoe UI", 8),
-            cursor="hand2",
-            padx=0
-        )
-        self.chk_alert.grid(row=0, column=1, sticky="w", pady=(0, 2))
-        
-        # Row 1, Col 0: Wake word checkbox (initial value from .env WAKE_WORD_ENABLED)
+        self.chk_llm.grid(row=0, column=0, sticky="w", padx=(0, 8), pady=(0, 2))
+
+        # Row 1, Col 0: Wake word checkbox
         self.wake_enabled = getattr(config, "WAKE_WORD_ENABLED", True)
         def toggle_wake():
             self.wake_enabled = self.use_wake_var.get()
@@ -310,9 +289,77 @@ class WinVoiceUI:
             cursor="hand2",
             padx=0
         )
-        self.chk_wake.grid(row=1, column=0, sticky="w", padx=(0, 10))
+        self.chk_wake.grid(row=1, column=0, sticky="w", padx=(0, 8))
 
-        # Row 1, Col 1: Clip+ checkbox (strictly aligned under 'alert')
+        # --- Column 1 ---
+        # Row 0, Col 1: AI task checkbox
+        self.ai_task_enabled = getattr(config, "AI_TASK_MODE", False)
+        def toggle_ai_task():
+            self.ai_task_enabled = self.use_ai_task_var.get()
+
+        self.use_ai_task_var = tk.BooleanVar(value=self.ai_task_enabled)
+        self.chk_ai_task = tk.Checkbutton(
+            self.controls_frame,
+            text="AI task",
+            variable=self.use_ai_task_var,
+            command=toggle_ai_task,
+            bg=self.COLOR_BG,
+            fg=self.COLOR_MUTED,
+            selectcolor=self.COLOR_GRIP,
+            activebackground=self.COLOR_BG,
+            activeforeground="#ffffff",
+            font=("Segoe UI", 8),
+            cursor="hand2",
+            padx=0
+        )
+        self.chk_ai_task.grid(row=0, column=1, sticky="w", padx=(0, 8), pady=(0, 2))
+
+        # Row 1, Col 1: Alert sound checkbox (aligned strictly under AI task)
+        self.alert_enabled = getattr(config, "ALERT_SOUND", True)
+        def toggle_alert():
+            self.alert_enabled = self.use_alert_var.get()
+            
+        self.use_alert_var = tk.BooleanVar(value=self.alert_enabled)
+        self.chk_alert = tk.Checkbutton(
+            self.controls_frame,
+            text="alert",
+            variable=self.use_alert_var,
+            command=toggle_alert,
+            bg=self.COLOR_BG,
+            fg=self.COLOR_MUTED,
+            selectcolor=self.COLOR_GRIP,
+            activebackground=self.COLOR_BG,
+            activeforeground="#ffffff",
+            font=("Segoe UI", 8),
+            cursor="hand2",
+            padx=0
+        )
+        self.chk_alert.grid(row=1, column=1, sticky="w", padx=(0, 8))
+
+        # --- Column 2 ---
+        # Row 0, Col 2: to EN checkbox
+        self.translate_en_enabled = getattr(config, "TRANSLATE_EN", False)
+        def toggle_translate_en():
+            self.translate_en_enabled = self.use_translate_en_var.get()
+
+        self.use_translate_en_var = tk.BooleanVar(value=self.translate_en_enabled)
+        self.chk_to_en = tk.Checkbutton(
+            self.controls_frame,
+            text="to EN",
+            variable=self.use_translate_en_var,
+            command=toggle_translate_en,
+            bg=self.COLOR_BG,
+            fg=self.COLOR_MUTED,
+            selectcolor=self.COLOR_GRIP,
+            activebackground=self.COLOR_BG,
+            activeforeground="#ffffff",
+            font=("Segoe UI", 8),
+            cursor="hand2",
+            padx=0
+        )
+        self.chk_to_en.grid(row=0, column=2, sticky="w", pady=(0, 2))
+
+        # Row 1, Col 2: Clip+ checkbox (aligned strictly under to EN)
         self.clip_prepend_enabled = getattr(config, "CLIP_PREPEND", False)
         def toggle_clip():
             self.clip_prepend_enabled = self.use_clip_var.get()
@@ -332,7 +379,7 @@ class WinVoiceUI:
             cursor="hand2",
             padx=0
         )
-        self.chk_clip.grid(row=1, column=1, sticky="w")
+        self.chk_clip.grid(row=1, column=2, sticky="w")
         
         # Close button in top-right: exits application
         def on_close(event=None):
@@ -349,7 +396,7 @@ class WinVoiceUI:
             
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
-        width = 255
+        width = 315
         height = 80
         
         if position == "bottom-right":

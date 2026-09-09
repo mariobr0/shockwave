@@ -153,9 +153,15 @@ class WinVoiceApp:
                 print(f"{cyan_glossary} {processed_text}")
             raw_text = processed_text
 
-            if self.ui.llm_enabled:
+            # Check if LLM processing is requested by any mode toggle
+            needs_llm = self.ui.llm_enabled or self.ui.ai_task_enabled or self.ui.translate_en_enabled
+            if needs_llm:
                 self.q.put({"cmd": "show", "text": "normalization"})
-                final_text = self.llm.normalize(raw_text)
+                final_text = self.llm.normalize(
+                    raw_text,
+                    translate_en=self.ui.translate_en_enabled,
+                    ai_task=self.ui.ai_task_enabled
+                )
             else:
                 final_text = raw_text
                 
