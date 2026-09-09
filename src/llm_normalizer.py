@@ -6,8 +6,11 @@ class LLMNormalizer:
         if not text:
             return ""
             
+        red = "\033[38;2;231;76;60m"
+        reset = "\033[0m"
+
         if not config.LLM_ENDPOINT:
-            print("Notice: LLM Endpoint is not configured. Returning raw transcript.")
+            print(f"{red}Notice: LLM Endpoint is not configured. Returning raw transcript.{reset}")
             return text
             
         headers = {
@@ -18,8 +21,9 @@ class LLMNormalizer:
             
         user_prompt = f"Raw transcript to punctuate and format (return ONLY the corrected text):\n{text}"
         
+        model_name = getattr(config, "LLM_MODEL", "gemini-2.5-flash-lite")
         payload = {
-            "model": config.LLM_MODEL,
+            "model": model_name,
             "messages": [
                 {"role": "system", "content": config.STT_SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt}
@@ -28,15 +32,38 @@ class LLMNormalizer:
             "temperature": 0.1
         }
         
+        print(f"Normalizing with {model_name}... ", end="", flush=True)
+        
         try:
             response = requests.post(config.LLM_ENDPOINT, json=payload, headers=headers, timeout=10)
-            response.raise_for_status()
+            if not response.ok:
+                err_detail = ""
+                try:
+                    err_json = response.json()
+                    err_detail = err_json.get("error", {}).get("message") or str(err_json)
+                except Exception:
+                    err_detail = response.text.strip()[:200]
+                print(f"{red}Failed (HTTP {response.status_code}: {err_detail}){reset}")
+                return text
+                
             data = response.json()
             normalized = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-            return normalized.strip() if normalized else text
+            if normalized and normalized.strip():
+                print("Success")
+                return normalized.strip()
+            else:
+                print(f"{red}Failed (Model returned empty response){reset}")
+                return text
+                
+        except requests.exceptions.Timeout:
+            print(f"{red}Failed (Connection timeout: server did not respond within 10s){reset}")
+            return text
+        except requests.exceptions.ConnectionError:
+            print(f"{red}Failed (Connection error: unable to reach endpoint {config.LLM_ENDPOINT}){reset}")
+            return text
         except requests.exceptions.RequestException as e:
-            print(f"LLM API Error: {e}")
-            return text  # Fallback to raw text
+            print(f"{red}Failed ({e}){reset}")
+            return text
         except Exception as e:
-            print(f"Unknown LLM Error: {e}")
+            print(f"{red}Failed ({e}){reset}")
             return text
