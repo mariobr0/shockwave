@@ -42,6 +42,10 @@ APP_VERSION = "1.0.0"
 LLM_ENDPOINT = os.getenv("LLM_ENDPOINT", "")
 LLM_API_KEY = os.getenv("LLM_API_KEY", "")
 LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash-lite")
+try:
+    LLM_TIMEOUT = int(os.getenv("LLM_TIMEOUT", "25"))
+except (ValueError, TypeError):
+    LLM_TIMEOUT = 25
 
 HOTKEY = os.getenv("HOTKEY", "ctrl+space")
 UI_POSITION = os.getenv("UI_POSITION", "bottom-left")

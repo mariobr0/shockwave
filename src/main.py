@@ -147,7 +147,11 @@ class WinVoiceApp:
         
         if raw_text:
             # Apply user glossary substitutions
-            raw_text = self.glossary.apply(raw_text)
+            processed_text = self.glossary.apply(raw_text)
+            if processed_text != raw_text:
+                cyan_glossary = "\033[38;2;100;200;255m\033[1m[Glossary]\033[0m"
+                print(f"{cyan_glossary} {processed_text}")
+            raw_text = processed_text
 
             if self.ui.llm_enabled:
                 self.q.put({"cmd": "show", "text": "normalization"})

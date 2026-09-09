@@ -34,8 +34,9 @@ class LLMNormalizer:
         
         print(f"Normalizing with {model_name}... ", end="", flush=True)
         
+        timeout_sec = getattr(config, "LLM_TIMEOUT", 25)
         try:
-            response = requests.post(config.LLM_ENDPOINT, json=payload, headers=headers, timeout=10)
+            response = requests.post(config.LLM_ENDPOINT, json=payload, headers=headers, timeout=timeout_sec)
             if not response.ok:
                 err_detail = ""
                 try:
@@ -71,7 +72,7 @@ class LLMNormalizer:
                 return text
                 
         except requests.exceptions.Timeout:
-            print(f"{red}Failed (Connection timeout: server did not respond within 10s){reset}")
+            print(f"{red}Failed (Connection timeout: server did not respond within {timeout_sec}s){reset}")
             return text
         except requests.exceptions.ConnectionError:
             print(f"{red}Failed (Connection error: unable to reach endpoint {config.LLM_ENDPOINT}){reset}")
