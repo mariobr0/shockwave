@@ -57,8 +57,7 @@ class WinVoiceApp:
             icon_path=icon_path,
             tooltip=f"Shockwave v{getattr(config, 'APP_VERSION', '1.0.0')}",
             on_quit=self.quit_app,
-            on_show_widget=self.show_widget_topmost,
-            on_hide_widget=self.hide_widget
+            on_show_widget=self.show_widget_topmost
         )
         self.tray.start()
         
@@ -74,10 +73,6 @@ class WinVoiceApp:
     def show_widget_topmost(self):
         """Signals UI queue to display floating widget and bring it topmost above all windows."""
         self.q.put({"cmd": "show_topmost"})
-
-    def hide_widget(self):
-        """Signals UI queue to hide floating widget to system tray."""
-        self.q.put({"cmd": "hide_widget"})
 
     def on_toggle_wake(self, is_enabled):
         if is_enabled:

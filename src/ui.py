@@ -312,9 +312,9 @@ class WinVoiceUI:
         )
         self.chk_wake.pack(side="left")
         
-        # Close button in top-right (minimizes floating widget to tray)
+        # Close button in top-right: exits application
         def on_close(event=None):
-            self.root.withdraw()
+            self.root.quit()
             
         self.close_btn = tk.Label(self.root, text="×", bg=self.COLOR_BG, fg=self.COLOR_MUTED, font=("Segoe UI", 10, "bold"), cursor="hand2")
         self.close_btn.place(relx=1.0, rely=0.0, anchor="ne", x=-3, y=1)
@@ -469,9 +469,8 @@ class WinVoiceUI:
             SWP_NOMOVE = 0x0002
             SWP_NOSIZE = 0x0001
             SWP_NOACTIVATE = 0x0010
-            SWP_SHOWWINDOW = 0x0040
             
-            flags = SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW
+            flags = SWP_NOMOVE | SWP_NOSIZE
             if not force_foreground:
                 flags |= SWP_NOACTIVATE
                 
@@ -545,13 +544,6 @@ class WinVoiceUI:
                     
                 elif cmd == "show_topmost":
                     self.show_window(play_sound=False)
-                elif cmd == "hide_widget":
-                    self.root.withdraw()
-                elif cmd == "toggle_widget":
-                    if self.root.winfo_viewable():
-                        self.root.withdraw()
-                    else:
-                        self.show_window(play_sound=False)
                 elif cmd == "quit":
                     self.root.quit()
                     return

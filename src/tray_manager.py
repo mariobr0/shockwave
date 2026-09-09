@@ -48,10 +48,9 @@ MF_STRING = 0x00000000
 MF_SEPARATOR = 0x00000800
 
 ID_SHOW_WIDGET = 1001
-ID_HIDE_WIDGET = 1002
-ID_SHOW_CONSOLE = 1003
-ID_HIDE_CONSOLE = 1004
-ID_QUIT = 1005
+ID_SHOW_CONSOLE = 1002
+ID_HIDE_CONSOLE = 1003
+ID_QUIT = 1004
 
 # 64-bit safe LRESULT & WNDPROC types
 LRESULT = ctypes.c_ssize_t
@@ -219,12 +218,11 @@ class SystemTrayManager:
     Lightweight Win32 System Tray Icon manager using native ctypes.
     Runs a message pump in a background thread.
     """
-    def __init__(self, icon_path=None, tooltip="Shockwave v1.0.0", on_quit=None, on_show_widget=None, on_hide_widget=None):
+    def __init__(self, icon_path=None, tooltip="Shockwave v1.0.0", on_quit=None, on_show_widget=None):
         self.icon_path = icon_path
         self.tooltip = tooltip
         self.on_quit = on_quit
         self.on_show_widget = on_show_widget
-        self.on_hide_widget = on_hide_widget
         
         self.hwnd = None
         self.hicon = None
@@ -253,9 +251,8 @@ class SystemTrayManager:
     def _show_context_menu(self):
         hmenu = user32.CreatePopupMenu()
         
-        # Menu options: Widget controls at the top, console below
-        user32.AppendMenuW(hmenu, MF_STRING, ID_SHOW_WIDGET, "Показать виджет")
-        user32.AppendMenuW(hmenu, MF_STRING, ID_HIDE_WIDGET, "Скрыть виджет")
+        # Menu options: bring widget above all windows
+        user32.AppendMenuW(hmenu, MF_STRING, ID_SHOW_WIDGET, "Показать виджет поверх всех окон")
         user32.AppendMenuW(hmenu, MF_SEPARATOR, 0, None)
         user32.AppendMenuW(hmenu, MF_STRING, ID_SHOW_CONSOLE, "Показать панель управления")
         user32.AppendMenuW(hmenu, MF_STRING, ID_HIDE_CONSOLE, "Скрыть панель в трей")
@@ -279,9 +276,6 @@ class SystemTrayManager:
         if cmd == ID_SHOW_WIDGET:
             if self.on_show_widget:
                 self.on_show_widget()
-        elif cmd == ID_HIDE_WIDGET:
-            if self.on_hide_widget:
-                self.on_hide_widget()
         elif cmd == ID_SHOW_CONSOLE:
             show_console()
         elif cmd == ID_HIDE_CONSOLE:
