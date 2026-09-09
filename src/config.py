@@ -22,6 +22,7 @@ GIGAAM_DIR = os.path.join(MODELS_DIR, "gigaam")
 VOSK_DIR = os.path.join(MODELS_DIR, "vosk-model-small-ru")
 VOSK_MODEL_PATH = os.getenv("VOSK_MODEL_PATH", VOSK_DIR)
 VOSK_MODEL_URL = os.getenv("VOSK_MODEL_URL", "https://alphacephei.com/vosk/models/vosk-model-small-ru-0.22.zip")
+GLOSSARY_PATH = os.path.join(os.path.dirname(MODELS_DIR), "glossary.txt") if getattr(sys, 'frozen', False) else os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "glossary.txt"))
 
 os.environ["HF_HOME"] = MODELS_DIR
 os.environ["HF_HUB_CACHE"] = MODELS_DIR
@@ -49,6 +50,7 @@ LLM_NORM = os.getenv("LLM_NORM", "false").strip().lower() in ["true", "1", "yes"
 ALERT_SOUND = os.getenv("ALERT_SOUND", "true").strip().lower() in ["true", "1", "yes"]
 WAKE_WORD_ENABLED = os.getenv("WAKE_WORD_ENABLED", "true").strip().lower() in ["true", "1", "yes"]
 WAKE_WORD = os.getenv("WAKE_WORD", "мегатрон")
+CLIP_PREPEND = os.getenv("CLIP_PREPEND", "false").strip().lower() in ["true", "1", "yes"]
 try:
     UI_OPACITY = float(os.getenv("UI_OPACITY", "0.80"))
 except (ValueError, TypeError):

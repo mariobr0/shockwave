@@ -240,10 +240,17 @@ class WinVoiceUI:
         self.cancel_btn.bind("<Enter>", on_cancel_enter)
         self.cancel_btn.bind("<Leave>", on_cancel_leave)
         
-        # Checkbox controls container
+        # Checkbox controls container (two rows)
         self.controls_frame = tk.Frame(self.right_frame, bg=self.COLOR_BG)
-        self.controls_frame.pack(fill="x")
+        self.controls_frame.pack(fill="x", pady=(1, 0))
         
+        self.row1_frame = tk.Frame(self.controls_frame, bg=self.COLOR_BG)
+        self.row1_frame.pack(fill="x", pady=(0, 2))
+        
+        self.row2_frame = tk.Frame(self.controls_frame, bg=self.COLOR_BG)
+        self.row2_frame.pack(fill="x")
+        
+        # Row 1: LLM norm & alert
         # LLM norm checkbox (initial value from .env LLM_NORM)
         self.llm_enabled = getattr(config, "LLM_NORM", False)
         def toggle_llm():
@@ -251,7 +258,7 @@ class WinVoiceUI:
             
         self.use_llm_var = tk.BooleanVar(value=self.llm_enabled)
         self.chk_llm = tk.Checkbutton(
-            self.controls_frame,
+            self.row1_frame,
             text="LLM norm",
             variable=self.use_llm_var,
             command=toggle_llm,
@@ -264,7 +271,7 @@ class WinVoiceUI:
             cursor="hand2",
             padx=0
         )
-        self.chk_llm.pack(side="left", padx=(0, 6))
+        self.chk_llm.pack(side="left", padx=(0, 8))
         
         # Alert sound checkbox (initial value from .env ALERT_SOUND)
         self.alert_enabled = getattr(config, "ALERT_SOUND", True)
@@ -273,7 +280,7 @@ class WinVoiceUI:
             
         self.use_alert_var = tk.BooleanVar(value=self.alert_enabled)
         self.chk_alert = tk.Checkbutton(
-            self.controls_frame,
+            self.row1_frame,
             text="alert",
             variable=self.use_alert_var,
             command=toggle_alert,
@@ -286,8 +293,9 @@ class WinVoiceUI:
             cursor="hand2",
             padx=0
         )
-        self.chk_alert.pack(side="left", padx=(0, 6))
+        self.chk_alert.pack(side="left", padx=(0, 8))
         
+        # Row 2: wake & clip+
         # Wake word checkbox (initial value from .env WAKE_WORD_ENABLED)
         self.wake_enabled = getattr(config, "WAKE_WORD_ENABLED", True)
         def toggle_wake():
@@ -297,7 +305,7 @@ class WinVoiceUI:
             
         self.use_wake_var = tk.BooleanVar(value=self.wake_enabled)
         self.chk_wake = tk.Checkbutton(
-            self.controls_frame,
+            self.row2_frame,
             text="wake",
             variable=self.use_wake_var,
             command=toggle_wake,
@@ -310,7 +318,29 @@ class WinVoiceUI:
             cursor="hand2",
             padx=0
         )
-        self.chk_wake.pack(side="left")
+        self.chk_wake.pack(side="left", padx=(0, 8))
+
+        # Clip+ checkbox (initial value from .env CLIP_PREPEND)
+        self.clip_prepend_enabled = getattr(config, "CLIP_PREPEND", False)
+        def toggle_clip():
+            self.clip_prepend_enabled = self.use_clip_var.get()
+
+        self.use_clip_var = tk.BooleanVar(value=self.clip_prepend_enabled)
+        self.chk_clip = tk.Checkbutton(
+            self.row2_frame,
+            text="clip+",
+            variable=self.use_clip_var,
+            command=toggle_clip,
+            bg=self.COLOR_BG,
+            fg=self.COLOR_MUTED,
+            selectcolor=self.COLOR_GRIP,
+            activebackground=self.COLOR_BG,
+            activeforeground="#ffffff",
+            font=("Segoe UI", 8),
+            cursor="hand2",
+            padx=0
+        )
+        self.chk_clip.pack(side="left", padx=(0, 8))
         
         # Close button in top-right: exits application
         def on_close(event=None):
@@ -322,13 +352,13 @@ class WinVoiceUI:
         self.close_btn.bind("<Enter>", lambda e: self.close_btn.config(fg="#ff5555"))
         self.close_btn.bind("<Leave>", lambda e: self.close_btn.config(fg=self.COLOR_MUTED))
         # Bind dragging to all container frames and background labels for seamless whole-bar moving
-        for bg_widget in (self.root, self.eye_frame, self.right_frame, self.header_frame, self.label, self.controls_frame):
+        for bg_widget in (self.root, self.eye_frame, self.right_frame, self.header_frame, self.label, self.controls_frame, self.row1_frame, self.row2_frame):
             self.make_draggable(bg_widget)
             
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
         width = 275
-        height = 62
+        height = 80
         
         if position == "bottom-right":
             x = screen_width - width - 20

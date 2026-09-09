@@ -15,6 +15,7 @@ from hotkey_manager import SystemHotkeyManager
 from single_instance import check_single_instance, release_single_instance
 from tray_manager import SystemTrayManager, hide_console, show_console
 from wake_word import WakeWordDetector
+from glossary import GlossaryManager
 
 class WinVoiceApp:
     def __init__(self, is_silent=False):
@@ -29,6 +30,7 @@ class WinVoiceApp:
         self.audio = AudioEngine()
         self.llm = LLMNormalizer()
         self.typer = Typer()
+        self.glossary = GlossaryManager(getattr(config, "GLOSSARY_PATH", None))
         
         self.is_recording = False
         self.is_processing = False
@@ -144,6 +146,9 @@ class WinVoiceApp:
         raw_text = self.audio.transcribe()
         
         if raw_text:
+            # Apply user glossary substitutions
+            raw_text = self.glossary.apply(raw_text)
+
             if self.ui.llm_enabled:
                 self.q.put({"cmd": "show", "text": "normalization"})
                 final_text = self.llm.normalize(raw_text)
@@ -152,7 +157,7 @@ class WinVoiceApp:
                 
             yellow_final = "\033[38;2;255;215;0m\033[1mFinal text:\033[0m"
             print(f"{yellow_final} {final_text}")
-            self.typer.type_text(final_text)
+            self.typer.type_text(final_text, prepend_clipboard=self.ui.clip_prepend_enabled)
             self.q.put({"cmd": "show_ready"})
         else:
             print("Warning: Transcription was empty or failed. Skipping.")
