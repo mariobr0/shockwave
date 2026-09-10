@@ -96,7 +96,7 @@ def print_banner():
             with open(ansi_path, "r", encoding="utf-8") as f:
                 lines = f.read().split("\n")
                 try:
-                    banner_pad_n = int(read_env("CLI_BANNER_PAD", "3"))
+                    banner_pad_n = int(getattr(config, "CLI_BANNER_PAD", read_env("CLI_BANNER_PAD", "3")))
                 except Exception:
                     banner_pad_n = 3
                 pad = " " * max(0, banner_pad_n)
@@ -106,15 +106,15 @@ def print_banner():
         except Exception:
             pass
             
-    # Iconic tagline with configurable color and padding from .env
+    # Iconic tagline with configurable color and padding from config / .env
     try:
-        quote_pad_n = int(read_env("CLI_QUOTE_PAD", "6"))
+        quote_pad_n = int(getattr(config, "CLI_QUOTE_PAD", read_env("CLI_QUOTE_PAD", "6")))
     except Exception:
         quote_pad_n = 6
     q_pad = " " * max(0, quote_pad_n)
     
-    quote_hex = read_env("CLI_QUOTE_COLOR", "#514757")
-    qr, qg, qb = hex_to_rgb(quote_hex, (81, 71, 87))
+    quote_hex = getattr(config, "CLI_QUOTE_COLOR", read_env("CLI_QUOTE_COLOR", "#807785"))
+    qr, qg, qb = hex_to_rgb(quote_hex, (128, 119, 133))
     tagline = "WHAT IS YOUR COMMAND, MEGATRON?"
     custom_quote = f"\033[1;3;38;2;{qr};{qg};{qb}m{tagline}\033[0m"
     print(f"{q_pad}{custom_quote}\n")
@@ -122,8 +122,8 @@ def print_banner():
 def menu():
     ensure_env_exists()
     
-    # Dynamic title color from .env (default: #B45FEB)
-    title_hex = read_env("CLI_TITLE_COLOR", "#B45FEB")
+    # Dynamic title color from config / .env (default: #B45FEB)
+    title_hex = getattr(config, "CLI_TITLE_COLOR", read_env("CLI_TITLE_COLOR", "#B45FEB"))
     tr, tg, tb = hex_to_rgb(title_hex, (180, 95, 235))
     PURPLE = f"\033[38;2;{tr};{tg};{tb}m"
     RESET = "\033[0m"
@@ -133,30 +133,30 @@ def menu():
         clear_screen()
         print_banner()
         
-        lang = read_env("APP_LANGUAGE", "en").lower()
-        engine = read_env("STT_ENGINE", "gigaam").lower()
+        lang = getattr(config, "APP_LANGUAGE", read_env("APP_LANGUAGE", "ru")).lower()
+        engine = getattr(config, "STT_ENGINE", read_env("STT_ENGINE", "gigaam")).lower()
         
         if engine == "whisper":
-            whisper_m = read_env("WHISPER_MODEL", "large-v3-turbo")
+            whisper_m = getattr(config, "WHISPER_MODEL", read_env("WHISPER_MODEL", "large-v3-turbo"))
             stt_display = f"Whisper ({whisper_m})"
         else:
-            gigaam_m = read_env("GIGAAM_MODEL", "gigaam-v3-e2e-rnnt")
-            quant = read_env("GIGAAM_QUANTIZATION", "int8")
+            gigaam_m = getattr(config, "GIGAAM_MODEL", read_env("GIGAAM_MODEL", "gigaam-v3-e2e-rnnt"))
+            quant = getattr(config, "GIGAAM_QUANTIZATION", read_env("GIGAAM_QUANTIZATION", "int8"))
             q_suffix = f", {quant}" if quant else ""
             stt_display = f"GigaAM ({gigaam_m}{q_suffix})"
 
-        wake_word = read_env("WAKE_WORD", "мегатрон")
+        wake_word = getattr(config, "WAKE_WORD", read_env("WAKE_WORD", "мегатрон"))
         wake_display = f"Vosk (\"{wake_word}\")"
 
-        llm_endpoint = read_env("LLM_ENDPOINT", "")
-        llm_model = read_env("LLM_MODEL", "gemini-2.5-flash-lite")
-        llm_key = read_env("LLM_API_KEY", "")
+        llm_endpoint = getattr(config, "LLM_ENDPOINT", read_env("LLM_ENDPOINT", ""))
+        llm_model = getattr(config, "LLM_MODEL", read_env("LLM_MODEL", "gemini-2.5-flash"))
+        llm_key = getattr(config, "LLM_API_KEY", read_env("LLM_API_KEY", ""))
         version = getattr(config, "APP_VERSION", "1.0.0")
         
         try:
-            title_pad_n = int(read_env("CLI_TITLE_PAD", "14"))
+            title_pad_n = int(getattr(config, "CLI_TITLE_PAD", read_env("CLI_TITLE_PAD", "0")))
         except Exception:
-            title_pad_n = 14
+            title_pad_n = 0
         t_pad = " " * max(0, title_pad_n)
         
         # Break URL protocol regex with zero-width space to prevent terminal hyperlink auto-underlining
